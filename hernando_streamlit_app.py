@@ -25,16 +25,33 @@ GITHUB_TOKEN = st.secrets["github"]["token"]
 
 # --- Fetch CSV from GitHub ---
 @st.cache_data
-def load_csv_from_github(owner, repo, path, token):
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+def load_csv_from_github(owner, repo, path, token, branch="main"):
+    """
+    Fetches a CSV file from a private GitHub repository using the raw URL and a personal access token.
+    
+    Parameters:
+        owner (str): GitHub username or organization.
+        repo (str): Repository name.
+        path (str): Path to the CSV file relative to the repo root.
+        token (str): GitHub personal access token with repo permissions.
+        branch (str): Branch name (default: 'main').
+    
+    Returns:
+        pd.DataFrame: CSV loaded as a DataFrame with 'Period' column parsed as datetime.
+    """
+    # Raw download URL
+    url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}"
     headers = {"Authorization": f"token {token}"}
+
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        raise Exception(f"Failed to fetch file: {response.status_code} {response.text}")
-    content = base64.b64decode(response.json()["content"])
-    df = pd.read_csv(StringIO(content.decode("utf-8")))
+        raise Exception(f"Failed to download CSV. Status: {response.status_code} {response.text}")
+
+    # Read CSV into DataFrame
+    df = pd.read_csv(StringIO(response.text))
     df['Period'] = pd.to_datetime(df['Period'])
     return df
+
 
 raw = load_csv_from_github(GITHUB_OWNER, GITHUB_REPO, CSV_PATH, GITHUB_TOKEN)
 
