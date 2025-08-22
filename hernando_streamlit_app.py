@@ -1,35 +1,44 @@
-# streamlit_app_fixed.py
+# streamlit_app_github.py
 import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from io import BytesIO
+from io import BytesIO, StringIO
+import requests
+import base64
 
 st.title("Hernando Billing Report Analysis")
 
-# --- Sidebar inputs (these drive recalculation) ---
+# --- Sidebar inputs (modify rates) ---
 st.sidebar.header("Modify Water & Sewer Rates")
 ppg_inside_2_5 = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (2k–5k):", value=3.15)
 ppg_inside_5   = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (>5k):", value=3.50)
 ppg_outside_2_5= st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (3k–5k):", value=3.50)
 ppg_outside_5  = st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (>5k):", value=3.95)
 
-# --- Load CSV (cached by file path) ---
+# --- GitHub private repo details ---
+GITHUB_OWNER = "jadwin1997"
+GITHUB_REPO  = "hernando_streamlit_app_data"
+CSV_PATH     = "Hernando-NewInfo.csv"  # path inside the repo
+GITHUB_TOKEN = st.secrets["github"]["token"]
+
+# --- Fetch CSV from GitHub ---
 @st.cache_data
-def load_csv(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path)
+def load_csv_from_github(owner, repo, path, token):
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    headers = {"Authorization": f"token {token}"}
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch file: {response.status_code} {response.text}")
+    content = base64.b64decode(response.json()["content"])
+    df = pd.read_csv(StringIO(content.decode("utf-8")))
     df['Period'] = pd.to_datetime(df['Period'])
     return df
 
-file_path = st.text_input("CSV File Path", "Hernando-NewInfo.csv")
-try:
-    raw = load_csv(file_path)
-except Exception as e:
-    st.error(f"Could not load CSV: {e}")
-    st.stop()
+raw = load_csv_from_github(GITHUB_OWNER, GITHUB_REPO, CSV_PATH, GITHUB_TOKEN)
 
-# --- Helpers (pure, no sidebar deps) ---
+# --- Helpers ---
 def clean_amt(x):
     return float(str(x).replace(',', '').replace('$', ''))
 
@@ -40,7 +49,6 @@ def check_estimated(row):
     gallons = int(str(row["Billing Cons"]).replace(',',''))
     wtr_rate = str(row["Wtr Rate"]).upper().strip()
     swr_rate = str(row["Swr Rate"]).upper().strip()
-
     water_charge = 0
     if 'ACTIVE' in str(row['Status'])[:6]:
         # WATER
@@ -60,7 +68,6 @@ def check_estimated(row):
                 water_charge = 16.00 + (2 * 3.50) + (gallons - 5) * 3.95
         else:
             return check_actual(row)
-
         # SEWER
         dcrua = clean_amt(row['DCRUA Amt'])
         if swr_rate in ["IRES", "ICOMM"]:
@@ -69,17 +76,14 @@ def check_estimated(row):
             sewer_charge = max(water_charge / 2, 8.00) + dcrua
         else:
             return check_actual(row)
-
         return round(water_charge + sewer_charge, 2)
     return 0
 
-# Make a row function that CAPTURES the current sidebar rates (no globals!)
 def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
     def _fn(row):
         gallons = int(str(row["Billing Cons"]).replace(',',''))
         wtr_rate = str(row["Wtr Rate"]).upper().strip()
         swr_rate = str(row["Swr Rate"]).upper().strip()
-
         water_charge = 0
         if 'ACTIVE' in str(row['Status'])[:6]:
             # WATER (with user-modifiable rates)
@@ -99,8 +103,6 @@ def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
                     water_charge = 16.00 + (2 * p_out_2_5) + (gallons - 5) * p_out_5
             else:
                 return check_actual(row)
-
-            # SEWER (unchanged)
             dcrua = clean_amt(row['DCRUA Amt'])
             if swr_rate in ["IRES", "ICOMM"]:
                 sewer_charge = max(water_charge / 2, 6.25) + dcrua
@@ -108,40 +110,35 @@ def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
                 sewer_charge = max(water_charge / 2, 8.00) + dcrua
             else:
                 return check_actual(row)
-
             return round(water_charge + sewer_charge, 2)
         return 0
     return _fn
 
-# --- Preprocess (cache depends on BOTH data AND current rates) ---
 @st.cache_data
-def preprocess(df: pd.DataFrame, p_in_2_5: float, p_in_5: float, p_out_2_5: float, p_out_5: float) -> pd.DataFrame:
+def preprocess(df, p_in_2_5, p_in_5, p_out_2_5, p_out_5):
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
-    mod_fn = make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5)
-    df['Modified_Total_Estimated_Bill'] = df.apply(mod_fn, axis=1)
-
+    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5), axis=1)
     df['Actual_Estimated_Diff'] = df['Actual_Total_Bill'] - df['Estimated_Total_Bill']
-    df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill'])
-    df['Relative_Error_%'] = df['Relative_Error_%'].replace([np.inf, -np.inf], 0).fillna(0)
+    df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
     return df
 
 file = preprocess(raw, ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5)
 
-# --- Show a peek ---
+# --- Display ---
 st.subheader("Sample of Billing Data")
 st.dataframe(file.head())
 
 # --- Monthly totals & line chart ---
 monthly_totals = file.groupby(file['Period'].dt.to_period('M')).agg({
-    'Actual_Total_Bill': 'sum',
-    'Estimated_Total_Bill': 'sum',
-    'Modified_Total_Estimated_Bill': 'sum'
+    'Actual_Total_Bill':'sum',
+    'Estimated_Total_Bill':'sum',
+    'Modified_Total_Estimated_Bill':'sum'
 })
 
 st.subheader("Monthly Revenue (Actual vs Estimated vs Modified)")
-fig, ax = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(10,5))
 monthly_totals['Actual_Total_Bill'].plot(ax=ax, marker='o', label='Actual')
 monthly_totals['Estimated_Total_Bill'].plot(ax=ax, marker='s', linestyle='--', label='Estimated')
 monthly_totals['Modified_Total_Estimated_Bill'].plot(ax=ax, marker='d', linestyle='--', label='Modified')
@@ -150,22 +147,19 @@ ax.set_xlabel("Month")
 ax.legend()
 st.pyplot(fig)
 
-# --- Totals ---
+# --- Revenue summary ---
 st.subheader("Revenue Summary")
 st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
 st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
 st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
-diff = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
-st.write(f"Difference (Actual - Estimated): ${diff:,.2f}")
-st.write(f"Difference (Modified - Actual): ${monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum():,.2f}") 
+diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
+diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum()
+st.write(f"Difference (Actual - Estimated): ${diff_est:,.2f}")
+st.write(f"Difference (Modified - Actual): ${diff_mod:,.2f}")
 
-# Quick sanity check when modified rates equal defaults
-if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15, 3.50, 3.50, 3.95):
-    equal = np.isclose(
-        file['Estimated_Total_Bill'].sum(),
-        file['Modified_Total_Estimated_Bill'].sum(),
-        rtol=0, atol=0.01
-    )
+# Quick sanity check
+if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15,3.50,3.50,3.95):
+    equal = np.isclose(file['Estimated_Total_Bill'].sum(), file['Modified_Total_Estimated_Bill'].sum(), rtol=0, atol=0.01)
     st.caption(f"Modified equals Estimated (at default rates): {'✅' if equal else '❌'}")
 
 # --- PDF download ---
@@ -173,8 +167,7 @@ st.subheader("Download Report as PDF")
 if st.button("Generate PDF"):
     buf = BytesIO()
     with PdfPages(buf) as pdf:
-        # Monthly revenue plot
-        fig, ax = plt.subplots(figsize=(10, 5))
+        fig, ax = plt.subplots(figsize=(10,5))
         monthly_totals['Actual_Total_Bill'].plot(ax=ax, marker='o', label='Actual')
         monthly_totals['Estimated_Total_Bill'].plot(ax=ax, marker='s', linestyle='--', label='Estimated')
         monthly_totals['Modified_Total_Estimated_Bill'].plot(ax=ax, marker='d', linestyle='--', label='Modified')
@@ -183,13 +176,11 @@ if st.button("Generate PDF"):
         ax.legend()
         pdf.savefig(); plt.close()
 
-        # Top 10 customers
         top_customers = file.groupby('Customer')['Actual_Total_Bill'].sum().sort_values(ascending=False).head(10)
-        fig, ax = plt.subplots(figsize=(10, 5))
+        fig, ax = plt.subplots(figsize=(10,5))
         top_customers.plot(kind='bar', ax=ax)
         ax.set_ylabel("Total Bill ($)")
         ax.set_xlabel("Customer")
         pdf.savefig(); plt.close()
 
-    st.download_button("Download PDF", buf.getvalue(),
-                       file_name="Hernando_Report.pdf", mime="application/pdf")
+    st.download_button("Download PDF", buf.getvalue(), file_name="Hernando_Report.pdf", mime="application/pdf")
