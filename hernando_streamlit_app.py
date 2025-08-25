@@ -11,7 +11,13 @@ import base64
 st.title("Hernando Billing Report Analysis")
 
 # --- Sidebar inputs (modify rates) ---
-st.sidebar.header("Modify Water & Sewer Rates")
+st.sidebar.header("Modify Water & Sewer Base Rates")
+ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50)
+icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50)
+ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00)
+ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00)
+
+st.sidebar.header("Modify Water & Sewer Variable Rates")
 ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (2k–5k):", value=3.15)
 ires_5   = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (>5k):", value=3.50)
 
@@ -114,7 +120,10 @@ def make_modified_fn(ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, oco
             # WATER (with user-modifiable rates)
             if wtr_rate in ["IRES", "ICOMM"]:
                 if gallons <= 2:
-                    water_charge = 12.50
+                    if(wtr_rate == "IRES"):
+                        water_charge = ires_base
+                    else:
+                        water_charge = icomm_base
                 elif gallons <= 5:
                     if(wtr_rate == "IRES"):
                         water_charge = 12.50 + (gallons - 2) * ires_2_5
@@ -127,7 +136,10 @@ def make_modified_fn(ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, oco
                         water_charge = 12.50 + (3 * icomm_2_5) + (gallons - 5) * icomm_5
             elif wtr_rate in ["ORES", "OCOMM"]:
                 if gallons <= 3:
-                    water_charge = 16.00
+                    if(wtr_rate == "ORES"):
+                        water_charge = ores_base
+                    else:
+                        water_charge = ocomm_base
                 elif gallons <= 5:
                     if(wtr_rate == "ORES"):
                         water_charge = 16.00 + (gallons - 3) * ores_2_5
