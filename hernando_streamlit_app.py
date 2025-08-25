@@ -249,47 +249,36 @@ st.pyplot(fig3)
 
 
 
-# --- IRES Water Usage by Tiers ---
-st.subheader("IRES Water Usage by Usage Tiers (gallons)")
+# --- Distribution of Revenue by Usage Range ---
+st.subheader("IRES Water Usage By Usage Tiers (gallons)")
 
-usage_by_tier = (
-    file[file['Wtr Rate']=='IRES']
-    .groupby("UsageRange")["Billing Cons"]
-    .sum()
-    .reindex(["0–2k", "2–5k", "5k+"])
-)
+# Convert Billing Cons (assumed in thousands of gallons) to numeric
+file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
 
-fig_u, ax_u = plt.subplots()
-ax_u.pie(
-    usage_by_tier, 
-    labels=usage_by_tier.index, 
+# Define usage range bins
+def usage_range(g):
+    if g <= 2:
+        return "0–2k"
+    elif g <= 5:
+        return "2–5k"
+    else:
+        return "5k+"
+
+file['UsageRange'] = file[file['Wtr Rate']=='IRES']['Billing Cons'].apply(usage_range)
+
+# Group and sum revenue
+revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+
+# Pie chart
+fig4, ax4 = plt.subplots()
+ax4.pie(
+    revenue_by_usage, 
+    labels=revenue_by_usage.index, 
     autopct='%1.1f%%',
     startangle=90
 )
-ax_u.set_title("Distribution of Water Usage (Gallons) by Tier")
-st.pyplot(fig_u)
-
-
-# --- IRES Revenue by Tiers ---
-st.subheader("IRES Revenue by Usage Tiers ($)")
-
-revenue_by_tier = (
-    file[file['Wtr Rate']=='IRES']
-    .groupby("UsageRange")["Actual_Total_Bill"]
-    .sum()
-    .reindex(["0–2k", "2–5k", "5k+"])
-)
-
-fig_r, ax_r = plt.subplots()
-ax_r.pie(
-    revenue_by_tier, 
-    labels=revenue_by_tier.index, 
-    autopct='%1.1f%%',
-    startangle=90
-)
-ax_r.set_title("Distribution of Revenue by Tier")
-st.pyplot(fig_r)
-
+ax4.set_title("Water Usage Distribution by Usage Tiers")
+st.pyplot(fig4)
 
 
 
@@ -413,7 +402,6 @@ ax8.pie(
 )
 ax8.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig8)
-
 
 
 
