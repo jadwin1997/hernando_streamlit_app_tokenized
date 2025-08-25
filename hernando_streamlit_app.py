@@ -12,7 +12,7 @@ st.title("Hernando Billing Report Analysis")
 
 # --- Sidebar inputs (modify rates) ---
 st.sidebar.header("Modify Water & Sewer Rates")
-ppg_inside_2_5 = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (2k–5k):", value=3.15)
+ppg_inside_2_5 = st.sidebar.number_input("Test Inside City (IRES & ICOMM) price/1000 gallons (2k–5k):", value=3.15)
 ppg_inside_5   = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (>5k):", value=3.50)
 ppg_outside_2_5= st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (3k–5k):", value=3.50)
 ppg_outside_5  = st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (>5k):", value=3.95)
