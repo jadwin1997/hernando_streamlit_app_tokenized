@@ -267,3 +267,110 @@ ax4.pie(
 )
 ax4.set_title("Revenue Distribution by Usage Range")
 st.pyplot(fig4)
+
+
+
+# --- Distribution of Revenue by Usage Range ---
+st.subheader("ICOMM Distribution of Revenue by Water Usage (gallons)")
+
+# Convert Billing Cons (assumed in thousands of gallons) to numeric
+file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
+
+# Define usage range bins
+def usage_range(g):
+    if g <= 2:
+        return "0–2k"
+    elif g <= 5:
+        return "2–5k"
+    else:
+        return "5k+"
+
+file['UsageRange'] = file[file['Wtr Rate']=='ICOMM']['Billing Cons'].apply(usage_range)
+
+# Group and sum revenue
+revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+
+# Pie chart
+fig5, ax5 = plt.subplots()
+ax5.pie(
+    revenue_by_usage, 
+    labels=revenue_by_usage.index, 
+    autopct='%1.1f%%',
+    startangle=90
+)
+ax5.set_title("Revenue Distribution by Usage Range")
+st.pyplot(fig5)
+
+
+
+
+# --- Distribution of Revenue by Usage Range ---
+st.subheader("ORES Distribution of Revenue by Water Usage (gallons)")
+
+# Convert Billing Cons (assumed in thousands of gallons) to numeric
+file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
+
+# Define usage range bins
+def usage_range(g):
+    if g <= 2:
+        return "0–2k"
+    elif g <= 5:
+        return "2–5k"
+    else:
+        return "5k+"
+
+file['UsageRange'] = file[file['Wtr Rate']=='ORES']['Billing Cons'].apply(usage_range)
+
+# Group and sum revenue
+revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+
+# Pie chart
+fig6, ax6 = plt.subplots()
+ax6.pie(
+    revenue_by_usage, 
+    labels=revenue_by_usage.index, 
+    autopct='%1.1f%%',
+    startangle=90
+)
+ax6.set_title("Revenue Distribution by Usage Range")
+st.pyplot(fig6)
+
+
+
+
+
+
+
+
+
+
+# --- Distribution of Revenue by Usage Range ---
+st.subheader("OCOMM Distribution of Revenue by Water Usage (gallons)")
+
+# Convert Billing Cons (assumed in thousands of gallons) to numeric
+file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
+
+# Define usage range bins
+def usage_range(g):
+    if g <= 2:
+        return "0–2k"
+    elif g <= 5:
+        return "2–5k"
+    else:
+        return "5k+"
+
+file['UsageRange'] = file[file['Wtr Rate']=='OCOMM']['Billing Cons'].apply(usage_range)
+
+# Group and sum revenue
+revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+
+# Pie chart
+fig7, ax7 = plt.subplots()
+ax7.pie(
+    revenue_by_usage, 
+    labels=revenue_by_usage.index, 
+    autopct='%1.1f%%',
+    startangle=90
+)
+ax7.set_title("Revenue Distribution by Usage Range")
+st.pyplot(fig7)
