@@ -452,7 +452,7 @@ def usage_range(g):
 file['UsageRange'] = file[file['Wtr Rate']=='IRES']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Estimated_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")["Modified_Total_Estimated_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig10, ax10 = plt.subplots()
@@ -476,7 +476,7 @@ file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replac
 file['UsageRange'] = file[file['Wtr Rate']=='ICOMM']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Estimated_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")["Modified_Total_Estimated_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig11, ax11 = plt.subplots()
@@ -503,7 +503,7 @@ file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replac
 file['UsageRange'] = file[file['Wtr Rate']=='ORES']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Estimated_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")["Modified_Total_Estimated_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig12, ax12 = plt.subplots()
@@ -524,7 +524,7 @@ file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replac
 file['UsageRange'] = file[file['Wtr Rate']=='OCOMM']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Estimated_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")["Modified_Total_Estimated_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig13, ax13 = plt.subplots()
@@ -572,7 +572,7 @@ file.loc[mask, "Class+Usage"] = file.loc[mask, "Wtr Rate"] + " " + file.loc[mask
 # Group and sum revenue
 revenue_by_class_usage = (
     file.loc[mask]
-    .groupby("Class+Usage")["Estimated_Total_Bill"]
+    .groupby("Class+Usage")["Modified_Total_Estimated_Bill"]
     .sum()
     .sort_values(ascending=False)
 )
