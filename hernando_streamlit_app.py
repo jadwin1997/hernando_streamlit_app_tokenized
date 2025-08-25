@@ -184,7 +184,7 @@ st.subheader("Profit by Water Rate Class")
 
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
-print(profit_by_rate.index)
+st.write(str(profit_by_rate.index))
 # Matplotlib Pie Chart
 fig2, ax2 = plt.subplots()
 ax2.pie(
