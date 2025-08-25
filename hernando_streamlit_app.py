@@ -267,7 +267,7 @@ def usage_range(g):
 file['UsageRange'] = file[file['Wtr Rate']=='IRES']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")["Billing Cons"].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig4, ax4 = plt.subplots()
