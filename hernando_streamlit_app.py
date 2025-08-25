@@ -179,3 +179,21 @@ if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15,3.50,
     equal = np.isclose(file['Estimated_Total_Bill'].sum(), file['Modified_Total_Estimated_Bill'].sum(), rtol=0, atol=0.01)
     st.caption(f"Modified equals Estimated (at default rates): {'✅' if equal else '❌'}")
 
+# --- Profits by Rate Class ---
+st.subheader("Profit by Water Rate Class")
+
+# Group by water rate
+profit_by_rate = file.groupby('Wtr Rate')['Actual_Total_Bill'].sum()
+
+# Matplotlib Pie Chart
+fig2, ax2 = plt.subplots()
+ax2.pie(
+    profit_by_rate, 
+    labels=profit_by_rate.index, 
+    autopct='%1.1f%%', 
+    startangle=90
+)
+ax2.set_title("Profit Distribution by Water Rate Class")
+st.pyplot(fig2)
+
+
