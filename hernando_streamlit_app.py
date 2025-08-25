@@ -183,7 +183,7 @@ if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15,3.50,
 st.subheader("Profit by Water Rate Class")
 
 # Group by water rate
-profit_by_rate = file[file['Wtr Rate']!='METER' and file['Wtr Rate']!='125 MTR' and file['Wtr Rate']!='FIREHYDR'].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
+profit_by_rate = file[file['Wtr Rate']!='METER' & file['Wtr Rate']!='125 MTR' & file['Wtr Rate']!='FIREHYDR'].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
 
 # Matplotlib Pie Chart
 fig2, ax2 = plt.subplots()
