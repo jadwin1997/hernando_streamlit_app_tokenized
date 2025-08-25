@@ -153,16 +153,16 @@ def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
     return _fn
 
 @st.cache_data
-def preprocess(df, p_in_2_5, p_in_5, p_out_2_5, p_out_5):
+def preprocess(df, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
-    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5), axis=1)
+    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5), axis=1)
     df['Actual_Estimated_Diff'] = df['Actual_Total_Bill'] - df['Estimated_Total_Bill']
     df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
     return df
 
-file = preprocess(raw, ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5)
+file = preprocess(raw, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5)
 
 # --- Display ---
 st.subheader("Sample of Billing Data")
