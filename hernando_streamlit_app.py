@@ -181,7 +181,7 @@ if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15,3.50,
 
 # --- Profits by Rate Class ---
 st.subheader("Profit by Water Rate Class")
-
+file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
 st.write(str(profit_by_rate.index))
