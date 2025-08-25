@@ -404,27 +404,7 @@ ax8.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig8)
 
 
-fig9, ax9 = plt.subplots(figsize=(8,8))
 
-# Create the pie chart with no labels on slices
-wedges, texts, autotexts = ax9.pie(
-    revenue_by_class_usage,
-    labels=None,           # hide labels on slices
-    autopct='%1.1f%%',     # still show percentages on slices
-    startangle=90
-)
-
-# Add a legend outside the pie
-ax9.legend(
-    wedges, 
-    revenue_by_class_usage.index, 
-    title="Class + Usage Tier",
-    loc="center left",
-    bbox_to_anchor=(1, 0, 0.5, 1)
-)
-
-ax9.set_title("Revenue Distribution by Class + Usage Tier")
-st.pyplot(fig9)
 
 
 
