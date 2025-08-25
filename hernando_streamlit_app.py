@@ -406,8 +406,8 @@ st.pyplot(fig8)
 
 # Explode slices where revenue is less than 5% of total
 total = revenue_by_class_usage.sum()
-explode = [0.2] * len(revenue_by_class_usage)
-fig9, ax9 = plt.subplots(figsize=(8,8))
+explode = [.7] * len(revenue_by_class_usage)
+fig9, ax9 = plt.subplots()
 ax9.pie(
     revenue_by_class_usage,
     labels=revenue_by_class_usage.index,
