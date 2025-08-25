@@ -250,7 +250,7 @@ st.pyplot(fig3)
 
 
 # --- Distribution of Revenue by Usage Range ---
-st.subheader("IRES Distribution of Revenue by Water Usage (gallons)")
+st.subheader("IRES Water Usage By Usage Tiers (gallons)")
 
 # Convert Billing Cons (assumed in thousands of gallons) to numeric
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
@@ -277,13 +277,13 @@ ax4.pie(
     autopct='%1.1f%%',
     startangle=90
 )
-ax4.set_title("Revenue Distribution by Usage Range")
+ax4.set_title("Water Usage Distribution by Usage Tiers")
 st.pyplot(fig4)
 
 
 
 # --- Distribution of Revenue by Usage Range ---
-st.subheader("ICOMM Distribution of Revenue by Water Usage (gallons)")
+st.subheader("ICOMM Distribution Water Usage by Usage Tiers (gallons)")
 
 # Convert Billing Cons (assumed in thousands of gallons) to numeric
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
@@ -301,14 +301,14 @@ ax5.pie(
     autopct='%1.1f%%',
     startangle=90
 )
-ax5.set_title("Revenue Distribution by Usage Range")
+ax5.set_title("Water Usage Distribution by Usage Tiers")
 st.pyplot(fig5)
 
 
 
 
 # --- Distribution of Revenue by Usage Range ---
-st.subheader("ORES Distribution of Revenue by Water Usage (gallons)")
+st.subheader("ORES Distribution Water Usage by Usage Tiers  (gallons)")
 
 # Convert Billing Cons (assumed in thousands of gallons) to numeric
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
@@ -328,11 +328,11 @@ ax6.pie(
     autopct='%1.1f%%',
     startangle=90
 )
-ax6.set_title("Revenue Distribution by Usage Range")
+ax6.set_title("Water Usage Distribution by Usage Tiers")
 st.pyplot(fig6)
 
 # --- Distribution of Revenue by Usage Range ---
-st.subheader("OCOMM Distribution of Revenue by Water Usage (gallons)")
+st.subheader("OCOMM Distribution Water Usage by Usage Tiers  (gallons)")
 
 # Convert Billing Cons (assumed in thousands of gallons) to numeric
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
@@ -349,7 +349,7 @@ ax7.pie(
     autopct='%1.1f%%',
     startangle=90
 )
-ax7.set_title("Revenue Distribution by Usage Range")
+ax7.set_title("Water Usage Distribution by Usage Tiers")
 st.pyplot(fig7)
 
 
