@@ -12,10 +12,18 @@ st.title("Hernando Billing Report Analysis")
 
 # --- Sidebar inputs (modify rates) ---
 st.sidebar.header("Modify Water & Sewer Rates")
-ppg_inside_2_5 = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (2k–5k):", value=3.15)
-ppg_inside_5   = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (>5k):", value=3.50)
-ppg_outside_2_5= st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (3k–5k):", value=3.50)
-ppg_outside_5  = st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (>5k):", value=3.95)
+ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (2k–5k):", value=3.15)
+ires_5   = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (>5k):", value=3.50)
+
+icomm_2_5 = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (2k–5k):", value=3.15)
+icomm_5   = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (>5k):", value=3.50)
+
+ores_2_5= st.sidebar.number_input("Outside City (ORES) price/1000 gallons (3k–5k):", value=3.50)
+ores_5  = st.sidebar.number_input("Outside City (ORES) price/1000 gallons (>5k):", value=3.95)
+
+ocomm_2_5= st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (3k–5k):", value=3.50)
+ocomm_5  = st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (>5k):", value=3.95)
+
 
 # --- GitHub private repo details ---
 GITHUB_OWNER = "jadwin1997"
@@ -108,16 +116,29 @@ def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
                 if gallons <= 2:
                     water_charge = 12.50
                 elif gallons <= 5:
-                    water_charge = 12.50 + (gallons - 2) * p_in_2_5
+                    if(wtr_rate == "IRES"):
+                        water_charge = 12.50 + (gallons - 2) * ires_2_5
+                    else:
+                        water_charge = 12.50 + (gallons - 2) * icomm_2_5
                 else:
-                    water_charge = 12.50 + (3 * p_in_2_5) + (gallons - 5) * p_in_5
+                    if(wtr_rate == "IRES"):
+                        water_charge = 12.50 + (3 * p_in_2_5) + (gallons - 5) * ires_5
+                    else:
+                        water_charge = 12.50 + (3 * p_in_2_5) + (gallons - 5) * icomm_5
             elif wtr_rate in ["ORES", "OCOMM"]:
                 if gallons <= 3:
                     water_charge = 16.00
                 elif gallons <= 5:
-                    water_charge = 16.00 + (gallons - 3) * p_out_2_5
+                    if(wtr_rate == "ORES"):
+                        water_charge = 16.00 + (gallons - 3) * ores_2_5
+                    else:
+                        water_charge = 16.00 + (gallons - 3) * ocomm_2_5
+
                 else:
-                    water_charge = 16.00 + (2 * p_out_2_5) + (gallons - 5) * p_out_5
+                    if(wtr_rate == "ORES"):
+                        water_charge = 16.00 + (2 * p_out_2_5) + (gallons - 5) * ores_5
+                    else: 
+                        water_charge = 16.00 + (2 * p_out_2_5) + (gallons - 5) * ocomm_5
             else:
                 return check_actual(row)
             dcrua = clean_amt(row['DCRUA Amt'])
@@ -174,10 +195,6 @@ diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_total
 st.write(f"Difference (Actual - Estimated): ${diff_est:,.2f}")
 st.write(f"Difference (Modified - Actual): ${diff_mod:,.2f}")
 
-# Quick sanity check
-if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15,3.50,3.50,3.95):
-    equal = np.isclose(file['Estimated_Total_Bill'].sum(), file['Modified_Total_Estimated_Bill'].sum(), rtol=0, atol=0.01)
-    st.caption(f"Modified equals Estimated (at default rates): {'✅' if equal else '❌'}")
 
 # --- Profits by Rate Class ---
 st.subheader("Revenue by Water Rate Class (Actual Revenue)")
