@@ -110,7 +110,7 @@ def check_estimated(row):
         return round(water_charge + sewer_charge, 2)
     return 0
 
-def make_modified_fn(ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
+def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
     def _fn(row):
         gallons = int(str(row["Billing Cons"]).replace(',',''))
         wtr_rate = str(row["Wtr Rate"]).upper().strip()
@@ -169,7 +169,7 @@ def preprocess(df, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
-    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5), axis=1)
+    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5), axis=1)
     df['Actual_Estimated_Diff'] = df['Actual_Total_Bill'] - df['Estimated_Total_Bill']
     df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
     return df
