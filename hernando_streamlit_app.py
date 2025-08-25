@@ -184,12 +184,12 @@ st.subheader("Profit by Water Rate Class")
 
 # Group by water rate
 profit_by_rate = file.groupby('Wtr Rate')['Actual_Total_Bill'].sum()
-
+profit_nonzero = profit_by_rate[profit_by_rate != 0]
 # Matplotlib Pie Chart
 fig2, ax2 = plt.subplots()
 ax2.pie(
     profit_by_rate, 
-    labels=profit_by_rate.index, 
+    labels=profit_nonzero.index, 
     autopct='%1.1f%%', 
     startangle=90
 )
