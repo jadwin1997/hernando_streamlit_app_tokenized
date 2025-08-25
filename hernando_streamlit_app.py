@@ -393,7 +393,7 @@ revenue_by_class_usage = (
 )
 
 # Pie chart
-fig8, ax8 = plt.subplots(figsize=(8,8))
+fig8, ax8 = plt.subplots()
 ax8.pie(
     revenue_by_class_usage,
     labels=revenue_by_class_usage.index,
@@ -402,3 +402,19 @@ ax8.pie(
 )
 ax8.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig8)
+
+
+# Explode slices where revenue is less than 5% of total
+total = revenue_by_class_usage.sum()
+explode = [0.1 if v/total < 0.05 else 0 for v in revenue_by_class_usage]
+
+fig9, ax9 = plt.subplots(figsize=(8,8))
+ax9.pie(
+    revenue_by_class_usage,
+    labels=revenue_by_class_usage.index,
+    autopct='%1.1f%%',
+    startangle=90,
+    explode=explode
+)
+ax9.set_title("Revenue Distribution by Class + Usage Tier")
+st.pyplot(fig9)
