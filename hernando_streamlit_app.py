@@ -104,7 +104,7 @@ def check_estimated(row):
         return round(water_charge + sewer_charge, 2)
     return 0
 
-def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
+def make_modified_fn(ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
     def _fn(row):
         gallons = int(str(row["Billing Cons"]).replace(',',''))
         wtr_rate = str(row["Wtr Rate"]).upper().strip()
@@ -122,9 +122,9 @@ def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
                         water_charge = 12.50 + (gallons - 2) * icomm_2_5
                 else:
                     if(wtr_rate == "IRES"):
-                        water_charge = 12.50 + (3 * p_in_2_5) + (gallons - 5) * ires_5
+                        water_charge = 12.50 + (3 * ires_2_5) + (gallons - 5) * ires_5
                     else:
-                        water_charge = 12.50 + (3 * p_in_2_5) + (gallons - 5) * icomm_5
+                        water_charge = 12.50 + (3 * icomm_2_5) + (gallons - 5) * icomm_5
             elif wtr_rate in ["ORES", "OCOMM"]:
                 if gallons <= 3:
                     water_charge = 16.00
@@ -136,9 +136,9 @@ def make_modified_fn(p_in_2_5, p_in_5, p_out_2_5, p_out_5):
 
                 else:
                     if(wtr_rate == "ORES"):
-                        water_charge = 16.00 + (2 * p_out_2_5) + (gallons - 5) * ores_5
+                        water_charge = 16.00 + (2 * ores_2_5) + (gallons - 5) * ores_5
                     else: 
-                        water_charge = 16.00 + (2 * p_out_2_5) + (gallons - 5) * ocomm_5
+                        water_charge = 16.00 + (2 * ocomm_2_5) + (gallons - 5) * ocomm_5
             else:
                 return check_actual(row)
             dcrua = clean_amt(row['DCRUA Amt'])
