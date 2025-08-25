@@ -221,7 +221,7 @@ st.subheader("Revenue by Water Rate Class (Estimated Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Modified_Total_Estimated_Bill'].sum()
-st.write(str(profit_by_rate.index))
+
 # Matplotlib Pie Chart
 fig3, ax3 = plt.subplots()
 ax3.pie(
@@ -276,15 +276,6 @@ st.subheader("ICOMM Distribution of Revenue by Water Usage (gallons)")
 # Convert Billing Cons (assumed in thousands of gallons) to numeric
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
 
-# Define usage range bins
-def usage_range(g):
-    if g <= 2:
-        return "0–2k"
-    elif g <= 5:
-        return "2–5k"
-    else:
-        return "5k+"
-
 file['UsageRange'] = file[file['Wtr Rate']=='ICOMM']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
@@ -310,14 +301,7 @@ st.subheader("ORES Distribution of Revenue by Water Usage (gallons)")
 # Convert Billing Cons (assumed in thousands of gallons) to numeric
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
 
-# Define usage range bins
-def usage_range(g):
-    if g <= 2:
-        return "0–2k"
-    elif g <= 5:
-        return "2–5k"
-    else:
-        return "5k+"
+
 
 file['UsageRange'] = file[file['Wtr Rate']=='ORES']['Billing Cons'].apply(usage_range)
 
@@ -335,30 +319,11 @@ ax6.pie(
 ax6.set_title("Revenue Distribution by Usage Range")
 st.pyplot(fig6)
 
-
-
-
-
-
-
-
-
-
 # --- Distribution of Revenue by Usage Range ---
 st.subheader("OCOMM Distribution of Revenue by Water Usage (gallons)")
 
 # Convert Billing Cons (assumed in thousands of gallons) to numeric
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
-
-# Define usage range bins
-def usage_range(g):
-    if g <= 2:
-        return "0–2k"
-    elif g <= 5:
-        return "2–5k"
-    else:
-        return "5k+"
-
 file['UsageRange'] = file[file['Wtr Rate']=='OCOMM']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
@@ -374,3 +339,54 @@ ax7.pie(
 )
 ax7.set_title("Revenue Distribution by Usage Range")
 st.pyplot(fig7)
+
+
+
+
+
+
+
+
+
+# --- Combined Distribution by Class + Usage ---
+st.subheader("Revenue Distribution by Water Rate Class + Usage Range")
+
+# Ensure Billing Cons is numeric gallons
+file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
+
+# Define usage ranges
+def usage_range(gallons):
+    if gallons < 2000:
+        return "0–2k"
+    elif gallons < 5000:
+        return "2–5k"
+    else:
+        return "5k+"
+
+# Apply usage category only for valid classes
+valid_classes = ["IRES", "ORES", "ICOMM", "OCOMM"]
+mask = file['Wtr Rate'].isin(valid_classes)
+
+file.loc[mask, "UsageRange"] = file.loc[mask, "Billing Cons"].apply(usage_range)
+
+# Combine Class + Range
+file.loc[mask, "Class+Usage"] = file.loc[mask, "Wtr Rate"] + " " + file.loc[mask, "UsageRange"]
+
+# Group and sum revenue
+revenue_by_class_usage = (
+    file.loc[mask]
+    .groupby("Class+Usage")["Actual_Total_Bill"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+# Pie chart
+fig8, ax8 = plt.subplots(figsize=(8,8))
+ax8.pie(
+    revenue_by_class_usage,
+    labels=revenue_by_class_usage.index,
+    autopct='%1.1f%%',
+    startangle=90
+)
+ax8.set_title("Revenue Distribution by Class + Usage Tier")
+st.pyplot(fig8)
