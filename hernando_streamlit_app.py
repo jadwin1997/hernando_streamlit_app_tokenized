@@ -180,7 +180,7 @@ if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15,3.50,
     st.caption(f"Modified equals Estimated (at default rates): {'✅' if equal else '❌'}")
 
 # --- Profits by Rate Class ---
-st.subheader("Profit by Water Rate Class")
+st.subheader("Revenue by Water Rate Class (Actual Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
@@ -197,3 +197,22 @@ ax2.set_title("Profit Distribution by Water Rate Class")
 st.pyplot(fig2)
 
 
+
+
+
+# --- Profits by Rate Class ---
+st.subheader("Revenue by Water Rate Class (Estimated Revenue)")
+file['Wtr Rate'] = file['Wtr Rate'].str.strip()
+# Group by water rate
+profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Modified_Total_Estimated_Bill'].sum()
+st.write(str(profit_by_rate.index))
+# Matplotlib Pie Chart
+fig3, ax3 = plt.subplots()
+ax3.pie(
+    profit_by_rate, 
+    labels=profit_by_rate.index, 
+    autopct='%1.1f%%', 
+    startangle=90
+)
+ax3.set_title("Profit Distribution by Water Rate Class")
+st.pyplot(fig3)
