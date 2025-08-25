@@ -201,7 +201,6 @@ st.subheader("Revenue by Water Rate Class (Actual Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
-st.write(str(profit_by_rate.index))
 # Matplotlib Pie Chart
 fig2, ax2 = plt.subplots()
 ax2.pie(
@@ -233,3 +232,53 @@ ax3.pie(
 )
 ax3.set_title("Profit Distribution by Water Rate Class")
 st.pyplot(fig3)
+
+
+# --- Profits by Rate Class ---
+st.subheader("Revenue by Water Rate Class (Estimated Revenue)")
+file['Wtr Rate'] = file['Wtr Rate'].str.strip()
+# Group by water rate
+profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Modified_Total_Estimated_Bill'].sum()
+st.write(str(profit_by_rate.index))
+# Matplotlib Pie Chart
+fig3, ax3 = plt.subplots()
+ax3.pie(
+    profit_by_rate, 
+    labels=profit_by_rate.index, 
+    autopct='%1.1f%%', 
+    startangle=90
+)
+ax3.set_title("Profit Distribution by Water Rate Class")
+st.pyplot(fig3)
+
+
+# --- Distribution of Revenue by Usage Range ---
+st.subheader("Distribution of Revenue by Water Usage")
+
+# Convert Billing Cons (assumed in thousands of gallons) to numeric
+file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
+
+# Define usage range bins
+def usage_range(g):
+    if g <= 2:
+        return "0–2k"
+    elif g <= 5:
+        return "2–5k"
+    else:
+        return "5k+"
+
+file['UsageRange'] = file['Billing Cons'].apply(usage_range)
+
+# Group and sum revenue
+revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+
+# Pie chart
+fig4, ax4 = plt.subplots()
+ax4.pie(
+    revenue_by_usage, 
+    labels=revenue_by_usage.index, 
+    autopct='%1.1f%%',
+    startangle=90
+)
+ax4.set_title("Revenue Distribution by Usage Range")
+st.pyplot(fig4)
