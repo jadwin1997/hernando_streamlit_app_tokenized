@@ -12,7 +12,7 @@ st.title("Hernando Billing Report Analysis")
 
 # --- Sidebar inputs (modify rates) ---
 st.sidebar.header("Modify Water & Sewer Rates")
-ppg_inside_2_5 = st.sidebar.number_input("Test Inside City (IRES & ICOMM) price/1000 gallons (2k–5k):", value=3.15)
+ppg_inside_2_5 = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (2k–5k):", value=3.15)
 ppg_inside_5   = st.sidebar.number_input("Inside City (IRES & ICOMM) price/1000 gallons (>5k):", value=3.50)
 ppg_outside_2_5= st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (3k–5k):", value=3.50)
 ppg_outside_5  = st.sidebar.number_input("Outside City (ORES & OCOMM) price/1000 gallons (>5k):", value=3.95)
@@ -179,25 +179,3 @@ if (ppg_inside_2_5, ppg_inside_5, ppg_outside_2_5, ppg_outside_5) == (3.15,3.50,
     equal = np.isclose(file['Estimated_Total_Bill'].sum(), file['Modified_Total_Estimated_Bill'].sum(), rtol=0, atol=0.01)
     st.caption(f"Modified equals Estimated (at default rates): {'✅' if equal else '❌'}")
 
-# --- PDF download ---
-st.subheader("Download Report as PDF")
-if st.button("Generate PDF"):
-    buf = BytesIO()
-    with PdfPages(buf) as pdf:
-        fig, ax = plt.subplots(figsize=(10,5))
-        monthly_totals['Actual_Total_Bill'].plot(ax=ax, marker='o', label='Actual')
-        monthly_totals['Estimated_Total_Bill'].plot(ax=ax, marker='s', linestyle='--', label='Estimated')
-        monthly_totals['Modified_Total_Estimated_Bill'].plot(ax=ax, marker='d', linestyle='--', label='Modified')
-        ax.set_ylabel("Total Bill ($)")
-        ax.set_xlabel("Month")
-        ax.legend()
-        pdf.savefig(); plt.close()
-
-        top_customers = file.groupby('Customer')['Actual_Total_Bill'].sum().sort_values(ascending=False).head(10)
-        fig, ax = plt.subplots(figsize=(10,5))
-        top_customers.plot(kind='bar', ax=ax)
-        ax.set_ylabel("Total Bill ($)")
-        ax.set_xlabel("Customer")
-        pdf.savefig(); plt.close()
-
-    st.download_button("Download PDF", buf.getvalue(), file_name="Hernando_Report.pdf", mime="application/pdf")
