@@ -425,3 +425,29 @@ ax9.legend(
 
 ax9.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig9)
+
+
+
+
+
+import plotly.express as px
+import pandas as pd
+import streamlit as st
+
+# Convert Series to DataFrame
+df = pd.DataFrame({
+    'Class_Usage': revenue_by_class_usage.index,
+    'Revenue': revenue_by_class_usage.values
+})
+
+# Plotly Pie Chart with hover
+fig = px.pie(
+    df,
+    names='Class_Usage',
+    values='Revenue',
+    hover_data=['Revenue'],  # what shows on hover
+    labels={'Revenue':'Revenue ($)'},
+)
+
+fig.update_traces(textinfo='percent+label')  # you can also set textinfo='none' to only show on hover
+st.plotly_chart(fig, use_container_width=True)
