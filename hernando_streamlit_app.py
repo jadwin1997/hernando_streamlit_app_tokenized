@@ -126,14 +126,14 @@ def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5,
                         water_charge = icomm_base
                 elif gallons <= 5:
                     if(wtr_rate == "IRES"):
-                        water_charge = 12.50 + (gallons - 2) * ires_2_5
+                        water_charge = ires_base + (gallons - 2) * ires_2_5
                     else:
-                        water_charge = 12.50 + (gallons - 2) * icomm_2_5
+                        water_charge = icomm_base + (gallons - 2) * icomm_2_5
                 else:
                     if(wtr_rate == "IRES"):
-                        water_charge = 12.50 + (3 * ires_2_5) + (gallons - 5) * ires_5
+                        water_charge = ires_base + (3 * ires_2_5) + (gallons - 5) * ires_5
                     else:
-                        water_charge = 12.50 + (3 * icomm_2_5) + (gallons - 5) * icomm_5
+                        water_charge = icomm_base + (3 * icomm_2_5) + (gallons - 5) * icomm_5
             elif wtr_rate in ["ORES", "OCOMM"]:
                 if gallons <= 3:
                     if(wtr_rate == "ORES"):
@@ -142,15 +142,15 @@ def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5,
                         water_charge = ocomm_base
                 elif gallons <= 5:
                     if(wtr_rate == "ORES"):
-                        water_charge = 16.00 + (gallons - 3) * ores_2_5
+                        water_charge = ores_base + (gallons - 3) * ores_2_5
                     else:
-                        water_charge = 16.00 + (gallons - 3) * ocomm_2_5
+                        water_charge = ocomm_base + (gallons - 3) * ocomm_2_5
 
                 else:
                     if(wtr_rate == "ORES"):
-                        water_charge = 16.00 + (2 * ores_2_5) + (gallons - 5) * ores_5
+                        water_charge = ores_base + (2 * ores_2_5) + (gallons - 5) * ores_5
                     else: 
-                        water_charge = 16.00 + (2 * ocomm_2_5) + (gallons - 5) * ocomm_5
+                        water_charge = ocomm_base + (2 * ocomm_2_5) + (gallons - 5) * ocomm_5
             else:
                 return check_actual(row)
             dcrua = clean_amt(row['DCRUA Amt'])
