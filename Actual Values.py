@@ -274,7 +274,7 @@ def usage_range(g):
     else:
         return "5k+"
 
-def plot_usage_distribution(df, rate_class, title_prefix):
+def plot_usage_distribution2(df, rate_class, title_prefix):
     """
     Filter df for a given water rate class, assign usage ranges, and plot pie chart.
     """
@@ -294,6 +294,45 @@ def plot_usage_distribution(df, rate_class, title_prefix):
         autopct='%1.1f%%',
         startangle=90
     )
+    ax.set_title(f"{title_prefix} Water Usage Distribution by Usage Tiers")
+    st.pyplot(fig)
+def plot_usage_distribution(df, rate_class, title_prefix):
+    """
+    Filter df for a given water rate class, assign usage ranges, and plot pie chart with legend.
+    """
+    subset = df[df['Wtr Rate'] == rate_class].copy()
+    subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
+
+    usage_totals = (
+        subset.groupby("UsageRange")["Billing Cons"]
+        .sum()
+        .reindex(["0–2k", "2–5k", "5k+"])
+    )
+
+    fig, ax = plt.subplots()
+    wedges, _ = ax.pie(
+        usage_totals,
+        labels=None,       # no labels on the slices
+        autopct=None,      # no text inside
+        startangle=90
+    )
+
+    # Build legend with percentages
+    total = usage_totals.sum()
+    legend_labels = [
+        f"{label}: {value:,.0f} ({value/total:.1%})"
+        for label, value in zip(usage_totals.index, usage_totals)
+        if pd.notna(value)  # in case some bins are empty
+    ]
+
+    ax.legend(
+        wedges,
+        legend_labels,
+        title="Usage Range",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1)
+    )
+
     ax.set_title(f"{title_prefix} Water Usage Distribution by Usage Tiers")
     st.pyplot(fig)
 
