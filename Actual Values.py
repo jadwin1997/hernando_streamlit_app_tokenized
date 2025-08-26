@@ -200,12 +200,12 @@ st.pyplot(fig)
 # --- Revenue summary ---
 st.subheader("Revenue Summary")
 st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
-st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
-st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
-diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
-diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum()
-st.write(f"Difference (Actual - Estimated): ${diff_est:,.2f}")
-st.write(f"Difference (Modified - Actual): ${diff_mod:,.2f}")
+#st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
+#st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
+#diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
+#diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum()
+#st.write(f"Difference (Actual - Estimated): ${diff_est:,.2f}")
+#st.write(f"Difference (Modified - Actual): ${diff_mod:,.2f}")
 
 
 # --- Profits by Rate Class ---
