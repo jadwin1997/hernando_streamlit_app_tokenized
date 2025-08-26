@@ -182,9 +182,9 @@ st.dataframe(file.head())
 
 # --- Monthly totals & line chart ---
 monthly_totals = file.groupby(file['Period'].dt.to_period('M')).agg({
-    'Actual_Total_Bill':'sum',
-    'Estimated_Total_Bill':'sum',
-    'Modified_Total_Estimated_Bill':'sum'
+    'Actual_Total_Bill':'sum'#,
+    #'Estimated_Total_Bill':'sum',
+    #'Modified_Total_Estimated_Bill':'sum'
 })
 
 st.subheader("Monthly Revenue (Actual vs Estimated vs Modified)")
