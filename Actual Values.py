@@ -273,41 +273,38 @@ def usage_range(g):
         return "2–5k"
     else:
         return "5k+"
+# --- Consistent Usage Range Helper ---
+def usage_range_2(g):
+    """Assign usage tier based on thousands of gallons."""
+    if pd.isna(g):
+        return None
+    if g <= 3:
+        return "0–3k"
+    elif g <= 5:
+        return "3–5k"
+    else:
+        return "5k+"
 
-def plot_usage_distribution2(df, rate_class, title_prefix):
-    """
-    Filter df for a given water rate class, assign usage ranges, and plot pie chart.
-    """
-    subset = df[df['Wtr Rate'] == rate_class].copy()
-    subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
 
-    usage_totals = (
-        subset.groupby("UsageRange")["Billing Cons"]
-        .sum()
-        .reindex(["0–2k", "2–5k", "5k+"])
-    )
-
-    fig, ax = plt.subplots()
-    ax.pie(
-        usage_totals,
-        labels=usage_totals.index,
-        autopct='%1.1f%%',
-        startangle=90
-    )
-    ax.set_title(f"{title_prefix} Water Usage Distribution by Usage Tiers")
-    st.pyplot(fig)
 def plot_usage_distribution(df, rate_class, title_prefix):
     """
     Filter df for a given water rate class, assign usage ranges, and plot pie chart with legend.
     """
     subset = df[df['Wtr Rate'] == rate_class].copy()
-    subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
-
-    usage_totals = (
-        subset.groupby("UsageRange")["Billing Cons"]
-        .sum()
-        .reindex(["0–2k", "2–5k", "5k+"])
-    )
+    if(rate_class == 'ORES' or rate_class == 'OCOMM'):
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range_2)
+        usage_totals = (
+            subset.groupby("UsageRange")["Billing Cons"]
+            .sum()
+            .reindex(["0–3k", "3–5k", "5k+"])
+        )
+    else:
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
+        usage_totals = (
+            subset.groupby("UsageRange")["Billing Cons"]
+            .sum()
+            .reindex(["0–2k", "2–5k", "5k+"])
+        )
 
     fig, ax = plt.subplots()
     wedges, _ = ax.pie(
@@ -335,6 +332,68 @@ def plot_usage_distribution(df, rate_class, title_prefix):
 
     ax.set_title(f"{title_prefix} Water Usage Distribution by Usage Tiers")
     st.pyplot(fig)
+
+
+def plot_revenue_distribution(df, rate_class, title_prefix, revenue_col="Actual_Total_Bill"):
+    """
+    Filter df for a given water rate class, assign usage ranges, 
+    and plot pie chart with legend showing REVENUE distribution.
+    
+    Parameters:
+    - df: DataFrame
+    - rate_class: str, water rate class (e.g., "IRES")
+    - title_prefix: str, prefix for the chart title
+    - revenue_col: str, column name for revenue ("Actual_Total_Bill" or "Modified_Total_Estimated_Bill")
+    """
+    subset = df[df['Wtr Rate'] == rate_class].copy()
+    
+    # Choose usage binning depending on class
+    if rate_class in ['ORES', 'OCOMM']:
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range_2)
+        revenue_totals = (
+            subset.groupby("UsageRange")[revenue_col]
+            .sum()
+            .reindex(["0–3k", "3–5k", "5k+"])
+        )
+    else:
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
+        revenue_totals = (
+            subset.groupby("UsageRange")[revenue_col]
+            .sum()
+            .reindex(["0–2k", "2–5k", "5k+"])
+        )
+
+    # Pie chart
+    fig, ax = plt.subplots()
+    wedges, _ = ax.pie(
+        revenue_totals,
+        labels=None,
+        autopct=None,
+        startangle=90
+    )
+
+    # Build legend with dollar amounts + percentages
+    total = revenue_totals.sum()
+    legend_labels = [
+        f"{label}: ${value:,.0f} ({value/total:.1%})"
+        for label, value in zip(revenue_totals.index, revenue_totals)
+        if pd.notna(value)
+    ]
+
+    ax.legend(
+        wedges,
+        legend_labels,
+        title="Usage Range",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1)
+    )
+
+    ax.set_title(f"{title_prefix} Revenue Distribution by Usage Tiers")
+    st.pyplot(fig)
+
+
+
+
 
 # --- Usage Distribution by Class ---
 st.subheader("Water Usage Distributions by Usage Tier")
