@@ -262,149 +262,65 @@ st.pyplot(fig3)
 
 
 
-
-# --- Distribution of Revenue by Usage Range ---
-st.subheader("IRES Water Usage By Usage Tiers (gallons)")
-
-# Convert Billing Cons (assumed in thousands of gallons) to numeric
-file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
-
-# Define usage range bins
+# --- Consistent Usage Range Helper ---
 def usage_range(g):
+    """Assign usage tier based on thousands of gallons."""
+    if pd.isna(g):
+        return None
     if g <= 2:
         return "0–2k"
     elif g <= 5:
         return "2–5k"
     else:
         return "5k+"
-# Filter IRES customers first
-ires_file = file[file['Wtr Rate'] == 'IRES'].copy()
 
-# Assign usage range
-ires_file['UsageRange'] = ires_file['Billing Cons'].apply(usage_range)
+def plot_usage_distribution(df, rate_class, title_prefix):
+    """
+    Filter df for a given water rate class, assign usage ranges, and plot pie chart.
+    """
+    subset = df[df['Wtr Rate'] == rate_class].copy()
+    subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
 
-# Group and sum usage
-revenue_by_usage = (
-    ires_file.groupby("UsageRange")["Billing Cons"]
-    .sum()
-    .reindex(["0–2k", "2–5k", "5k+"])
-)
+    usage_totals = (
+        subset.groupby("UsageRange")["Billing Cons"]
+        .sum()
+        .reindex(["0–2k", "2–5k", "5k+"])
+    )
 
-# Pie chart
-fig4, ax4 = plt.subplots()
-ax4.pie(
-    revenue_by_usage,
-    labels=revenue_by_usage.index,
-    autopct='%1.1f%%',
-    startangle=90
-)
-ax4.set_title("Water Usage Distribution by Usage Tiers (IRES only)")
-st.pyplot(fig4)
+    fig, ax = plt.subplots()
+    ax.pie(
+        usage_totals,
+        labels=usage_totals.index,
+        autopct='%1.1f%%',
+        startangle=90
+    )
+    ax.set_title(f"{title_prefix} Water Usage Distribution by Usage Tiers")
+    st.pyplot(fig)
 
+# --- Usage Distribution by Class ---
+st.subheader("Water Usage Distributions by Usage Tier")
 
-# --- Distribution of Revenue by Usage Range ---
-st.subheader("ICOMM Distribution Water Usage by Usage Tiers (gallons)")
-
-# Convert Billing Cons (assumed in thousands of gallons) to numeric
+# Ensure Billing Cons numeric (thousands of gallons)
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
 
-file['UsageRange'] = file[file['Wtr Rate']=='ICOMM']['Billing Cons'].apply(usage_range)
-
-# Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")['Billing Cons'].sum().reindex(["0–2k", "2–5k", "5k+"])
-
-# Pie chart
-fig5, ax5 = plt.subplots()
-ax5.pie(
-    revenue_by_usage, 
-    labels=revenue_by_usage.index, 
-    autopct='%1.1f%%',
-    startangle=90
-)
-ax5.set_title("Water Usage Distribution by Usage Tiers")
-st.pyplot(fig5)
-
-
-
-
-# --- Distribution of Revenue by Usage Range ---
-st.subheader("ORES Distribution Water Usage by Usage Tiers  (gallons)")
-
-# Convert Billing Cons (assumed in thousands of gallons) to numeric
-file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
-
-
-
-file['UsageRange'] = file[file['Wtr Rate']=='ORES']['Billing Cons'].apply(usage_range)
-
-# Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")['Billing Cons'].sum().reindex(["0–2k", "2–5k", "5k+"])
-
-# Pie chart
-fig6, ax6 = plt.subplots()
-ax6.pie(
-    revenue_by_usage, 
-    labels=revenue_by_usage.index, 
-    autopct='%1.1f%%',
-    startangle=90
-)
-ax6.set_title("Water Usage Distribution by Usage Tiers")
-st.pyplot(fig6)
-
-# --- Distribution of Revenue by Usage Range ---
-st.subheader("OCOMM Distribution Water Usage by Usage Tiers  (gallons)")
-
-# Convert Billing Cons (assumed in thousands of gallons) to numeric
-file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
-file['UsageRange'] = file[file['Wtr Rate']=='OCOMM']['Billing Cons'].apply(usage_range)
-
-# Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")['Billing Cons'].sum().reindex(["0–2k", "2–5k", "5k+"])
-
-# Pie chart
-fig7, ax7 = plt.subplots()
-ax7.pie(
-    revenue_by_usage, 
-    labels=revenue_by_usage.index, 
-    autopct='%1.1f%%',
-    startangle=90
-)
-ax7.set_title("Water Usage Distribution by Usage Tiers")
-st.pyplot(fig7)
-
-
-
-
-
-
-
+plot_usage_distribution(file, "IRES",  "IRES")
+plot_usage_distribution(file, "ICOMM", "ICOMM")
+plot_usage_distribution(file, "ORES",  "ORES")
+plot_usage_distribution(file, "OCOMM", "OCOMM")
 
 
 # --- Combined Distribution by Class + Usage ---
 st.subheader("Revenue Distribution by Water Rate Class + Usage Range")
 
-# Ensure Billing Cons is numeric gallons
-file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
-
-# Define usage ranges
-def usage_range(gallons):
-    if gallons < 2:
-        return "0–2k"
-    elif gallons < 5:
-        return "2–5k"
-    else:
-        return "5k+"
-
-# Apply usage category only for valid classes
+# Apply usage categories for valid classes
 valid_classes = ["IRES", "ORES", "ICOMM", "OCOMM"]
 mask = file['Wtr Rate'].isin(valid_classes)
-
 file.loc[mask, "UsageRange"] = file.loc[mask, "Billing Cons"].apply(usage_range)
 
-# Combine Class + Range
+# Build combined category
 file.loc[mask, "Class+Usage"] = file.loc[mask, "Wtr Rate"] + " " + file.loc[mask, "UsageRange"]
 
-# Group and sum revenue
+# Group and sum revenue (Actuals)
 revenue_by_class_usage = (
     file.loc[mask]
     .groupby("Class+Usage")["Actual_Total_Bill"]
@@ -423,9 +339,7 @@ ax8.pie(
 ax8.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig8)
 
-
-
-# --- Bar chart ---
+# Bar chart of revenue
 fig9, ax9 = plt.subplots(figsize=(10,6))
 revenue_by_class_usage.plot(
     kind="bar",
@@ -433,48 +347,30 @@ revenue_by_class_usage.plot(
     color="skyblue",
     edgecolor="black"
 )
-
 ax9.set_title("Profit by Class + Usage Tier")
 ax9.set_xlabel("Class + Usage Tier")
 ax9.set_ylabel("Profit ($)")
 ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
-
 st.pyplot(fig9)
 
-
-
-# Group and sum revenue
-water_by_class_usage = (
+# Group and sum usage
+usage_by_class_usage = (
     file.loc[mask]
     .groupby("Class+Usage")["Billing Cons"]
     .sum()
     .sort_values(ascending=False)
 )
 
-
-
-# --- Bar chart ---
+# Bar chart of usage
 fig10, ax10 = plt.subplots(figsize=(10,6))
-water_by_class_usage.plot(
+usage_by_class_usage.plot(
     kind="bar",
     ax=ax10,
     color="skyblue",
     edgecolor="black"
 )
-
 ax10.set_title("Usage by Class + Usage Tier")
 ax10.set_xlabel("Class + Usage Tier")
-ax10.set_ylabel("Usage Amount (Gallons)")
-ax10.set_xticklabels(water_by_class_usage.index, rotation=45, ha="right")
-
+ax10.set_ylabel("Usage Amount (Thousands of Gallons)")
+ax10.set_xticklabels(usage_by_class_usage.index, rotation=45, ha="right")
 st.pyplot(fig10)
-
-
-
-
-
-
-
-
-
-
