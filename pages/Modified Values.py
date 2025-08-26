@@ -1,0 +1,499 @@
+# streamlit_app_github.py
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+from io import BytesIO, StringIO
+import requests
+import base64
+import plotly.express as px
+st.title("Hernando Billing Report Analysis")
+
+# --- Sidebar inputs (modify rates) ---
+st.sidebar.header("Modify Water & Sewer Base Rates")
+ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50)
+icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50)
+ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00)
+ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00)
+
+st.sidebar.header("Modify Water & Sewer Variable Rates")
+ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (2k–5k):", value=3.15)
+ires_5   = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (>5k):", value=3.50)
+
+icomm_2_5 = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (2k–5k):", value=3.15)
+icomm_5   = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (>5k):", value=3.50)
+
+ores_2_5= st.sidebar.number_input("Outside City (ORES) price/1000 gallons (3k–5k):", value=3.50)
+ores_5  = st.sidebar.number_input("Outside City (ORES) price/1000 gallons (>5k):", value=3.95)
+
+ocomm_2_5= st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (3k–5k):", value=3.50)
+ocomm_5  = st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (>5k):", value=3.95)
+
+
+# --- GitHub private repo details ---
+GITHUB_OWNER = "jadwin1997"
+GITHUB_REPO  = "hernando_streamlit_app_data"
+CSV_PATH     = "Hernando-NewInfo.csv"  # path inside the repo
+GITHUB_TOKEN = st.secrets["github"]["token"]
+
+# --- Fetch CSV from GitHub ---
+@st.cache_data
+def load_csv_from_github(owner, repo, path, token, branch="main"):
+    """
+    Fetches a CSV file from a private GitHub repository using the raw URL and a personal access token.
+    
+    Parameters:
+        owner (str): GitHub username or organization.
+        repo (str): Repository name.
+        path (str): Path to the CSV file relative to the repo root.
+        token (str): GitHub personal access token with repo permissions.
+        branch (str): Branch name (default: 'main').
+    
+    Returns:
+        pd.DataFrame: CSV loaded as a DataFrame with 'Period' column parsed as datetime.
+    """
+    # Raw download URL
+    url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}"
+    headers = {"Authorization": f"token {token}"}
+
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download CSV. Status: {response.status_code} {response.text}")
+
+    # Read CSV into DataFrame
+    df = pd.read_csv(StringIO(response.text))
+    df['Period'] = pd.to_datetime(df['Period'])
+    return df
+
+
+raw = load_csv_from_github(GITHUB_OWNER, GITHUB_REPO, CSV_PATH, GITHUB_TOKEN)
+
+# --- Helpers ---
+def clean_amt(x):
+    return float(str(x).replace(',', '').replace('$', ''))
+
+def check_actual(row):
+    return clean_amt(row['Wtr Amt']) + clean_amt(row['Swr Amt']) + clean_amt(row['DCRUA Amt'])
+
+def check_estimated(row):
+    gallons = int(str(row["Billing Cons"]).replace(',',''))
+    wtr_rate = str(row["Wtr Rate"]).upper().strip()
+    swr_rate = str(row["Swr Rate"]).upper().strip()
+    water_charge = 0
+    if 'ACTIVE' in str(row['Status'])[:6]:
+        # WATER
+        if wtr_rate in ["IRES", "ICOMM"]:
+            if gallons <= 2:
+                water_charge = 12.50
+            elif gallons <= 5:
+                water_charge = 12.50 + (gallons - 2) * 3.15
+            else:
+                water_charge = 12.50 + (3 * 3.15) + (gallons - 5) * 3.50
+        elif wtr_rate in ["ORES", "OCOMM"]:
+            if gallons <= 3:
+                water_charge = 16.00
+            elif gallons <= 5:
+                water_charge = 16.00 + (gallons - 3) * 3.50
+            else:
+                water_charge = 16.00 + (2 * 3.50) + (gallons - 5) * 3.95
+        else:
+            return check_actual(row)
+        # SEWER
+        dcrua = clean_amt(row['DCRUA Amt'])
+        if swr_rate in ["IRES", "ICOMM"]:
+            sewer_charge = max(water_charge / 2, 6.25) + dcrua
+        elif swr_rate in ["ORES", "OCOMM"]:
+            sewer_charge = max(water_charge / 2, 8.00) + dcrua
+        else:
+            return check_actual(row)
+        return round(water_charge + sewer_charge, 2)
+    return 0
+
+def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
+    def _fn(row):
+        gallons = int(str(row["Billing Cons"]).replace(',',''))
+        wtr_rate = str(row["Wtr Rate"]).upper().strip()
+        swr_rate = str(row["Swr Rate"]).upper().strip()
+        water_charge = 0
+        if 'ACTIVE' in str(row['Status'])[:6]:
+            # WATER (with user-modifiable rates)
+            if wtr_rate in ["IRES", "ICOMM"]:
+                if gallons <= 2:
+                    if(wtr_rate == "IRES"):
+                        water_charge = ires_base
+                    else:
+                        water_charge = icomm_base
+                elif gallons <= 5:
+                    if(wtr_rate == "IRES"):
+                        water_charge = ires_base + (gallons - 2) * ires_2_5
+                    else:
+                        water_charge = icomm_base + (gallons - 2) * icomm_2_5
+                else:
+                    if(wtr_rate == "IRES"):
+                        water_charge = ires_base + (3 * ires_2_5) + (gallons - 5) * ires_5
+                    else:
+                        water_charge = icomm_base + (3 * icomm_2_5) + (gallons - 5) * icomm_5
+            elif wtr_rate in ["ORES", "OCOMM"]:
+                if gallons <= 3:
+                    if(wtr_rate == "ORES"):
+                        water_charge = ores_base
+                    else:
+                        water_charge = ocomm_base
+                elif gallons <= 5:
+                    if(wtr_rate == "ORES"):
+                        water_charge = ores_base + (gallons - 3) * ores_2_5
+                    else:
+                        water_charge = ocomm_base + (gallons - 3) * ocomm_2_5
+
+                else:
+                    if(wtr_rate == "ORES"):
+                        water_charge = ores_base + (2 * ores_2_5) + (gallons - 5) * ores_5
+                    else: 
+                        water_charge = ocomm_base + (2 * ocomm_2_5) + (gallons - 5) * ocomm_5
+            else:
+                return check_actual(row)
+            dcrua = clean_amt(row['DCRUA Amt'])
+            if swr_rate in ["IRES", "ICOMM"]:
+                sewer_charge = max(water_charge / 2, 6.25) + dcrua
+            elif swr_rate in ["ORES", "OCOMM"]:
+                sewer_charge = max(water_charge / 2, 8.00) + dcrua
+            else:
+                return check_actual(row)
+            return round(water_charge + sewer_charge, 2)
+        return 0
+    return _fn
+
+@st.cache_data
+def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
+    df = df.copy()
+    df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
+    df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
+    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5), axis=1)
+    df['Actual_Estimated_Diff'] = df['Actual_Total_Bill'] - df['Estimated_Total_Bill']
+    df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
+    return df
+
+file = preprocess(raw,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5)
+
+# --- Display ---
+st.subheader("Sample of Billing Data")
+st.dataframe(file.head())
+
+# --- Monthly totals & line chart ---
+monthly_totals = file.groupby(file['Period'].dt.to_period('M')).agg({
+    'Actual_Total_Bill':'sum',
+    'Estimated_Total_Bill':'sum',
+    'Modified_Total_Estimated_Bill':'sum'
+})
+
+st.subheader("Monthly Revenue (Actual vs Estimated vs Modified)")
+fig, ax = plt.subplots(figsize=(10,5))
+monthly_totals['Actual_Total_Bill'].plot(ax=ax, marker='o', label='Actual')
+monthly_totals['Estimated_Total_Bill'].plot(ax=ax, marker='s', linestyle='--', label='Estimated')
+monthly_totals['Modified_Total_Estimated_Bill'].plot(ax=ax, marker='d', linestyle='--', label='Modified')
+ax.set_ylabel("Total Bill ($)")
+ax.set_xlabel("Month")
+ax.legend()
+st.pyplot(fig)
+
+# --- Revenue summary ---
+st.subheader("Revenue Summary")
+st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
+st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
+st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
+diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
+diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum()
+st.write(f"Difference (Actual - Estimated): ${diff_est:,.2f}")
+st.write(f"Difference (Modified - Actual): ${diff_mod:,.2f}")
+
+
+# --- Profits by Rate Class ---
+st.subheader("Revenue by Water Rate Class (Actual Revenue)")
+file['Wtr Rate'] = file['Wtr Rate'].str.strip()
+# Group by water rate
+profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
+# Matplotlib Pie Chart
+fig2, ax2 = plt.subplots()
+ax2.pie(
+    profit_by_rate, 
+    labels=profit_by_rate.index, 
+    autopct='%1.1f%%', 
+    startangle=90
+)
+ax2.set_title("Profit Distribution by Water Rate Class")
+st.pyplot(fig2)
+
+
+# --- Profits by Rate Class ---
+st.subheader("Revenue by Water Rate Class (Estimated Revenue)")
+file['Wtr Rate'] = file['Wtr Rate'].str.strip()
+# Group by water rate
+profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Estimated_Total_Bill'].sum()
+# Matplotlib Pie Chart
+fig2_5, ax2_5 = plt.subplots()
+ax2_5.pie(
+    profit_by_rate, 
+    labels=profit_by_rate.index, 
+    autopct='%1.1f%%', 
+    startangle=90
+)
+ax2_5.set_title("Profit Distribution by Water Rate Class")
+st.pyplot(fig2_5)
+
+
+# --- Profits by Rate Class ---
+st.subheader("Revenue by Water Rate Class (Modified Revenue)")
+file['Wtr Rate'] = file['Wtr Rate'].str.strip()
+# Group by water rate
+profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Modified_Total_Estimated_Bill'].sum()
+
+# Matplotlib Pie Chart
+fig3, ax3 = plt.subplots()
+ax3.pie(
+    profit_by_rate, 
+    labels=profit_by_rate.index, 
+    autopct='%1.1f%%', 
+    startangle=90
+)
+ax3.set_title("Profit Distribution by Water Rate Class")
+st.pyplot(fig3)
+
+
+
+
+# --- Consistent Usage Range Helper ---
+def usage_range(g):
+    """Assign usage tier based on thousands of gallons."""
+    if pd.isna(g):
+        return None
+    if g <= 2:
+        return "0–2k"
+    elif g <= 5:
+        return "2–5k"
+    else:
+        return "5k+"
+# --- Consistent Usage Range Helper ---
+def usage_range_2(g):
+    """Assign usage tier based on thousands of gallons."""
+    if pd.isna(g):
+        return None
+    if g <= 3:
+        return "0–3k"
+    elif g <= 5:
+        return "3–5k"
+    else:
+        return "5k+"
+
+
+def plot_usage_distribution(df, rate_class, title_prefix):
+    """
+    Filter df for a given water rate class, assign usage ranges, and plot pie chart with legend.
+    """
+    subset = df[df['Wtr Rate'] == rate_class].copy()
+    if(rate_class == 'ORES' or rate_class == 'OCOMM'):
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range_2)
+        usage_totals = (
+            subset.groupby("UsageRange")["Billing Cons"]
+            .sum()
+            .reindex(["0–3k", "3–5k", "5k+"])
+        )
+    else:
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
+        usage_totals = (
+            subset.groupby("UsageRange")["Billing Cons"]
+            .sum()
+            .reindex(["0–2k", "2–5k", "5k+"])
+        )
+
+    fig, ax = plt.subplots()
+    wedges, _ = ax.pie(
+        usage_totals,
+        labels=None,       # no labels on the slices
+        autopct=None,      # no text inside
+        startangle=90
+    )
+
+    # Build legend with percentages
+    total = usage_totals.sum()
+    legend_labels = [
+        f"{label}: {value:,.0f} ({value/total:.1%})"
+        for label, value in zip(usage_totals.index, usage_totals)
+        if pd.notna(value)  # in case some bins are empty
+    ]
+
+    ax.legend(
+        wedges,
+        legend_labels,
+        title="Usage Range",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1)
+    )
+
+    ax.set_title(f"{title_prefix} Water Usage Distribution by Usage Tiers")
+    st.pyplot(fig)
+
+
+def plot_revenue_distribution(df, rate_class, title_prefix, revenue_col="Actual_Total_Bill"):
+    """
+    Filter df for a given water rate class, assign usage ranges, 
+    and plot pie chart with legend showing REVENUE distribution.
+    
+    Parameters:
+    - df: DataFrame
+    - rate_class: str, water rate class (e.g., "IRES")
+    - title_prefix: str, prefix for the chart title
+    - revenue_col: str, column name for revenue ("Actual_Total_Bill" or "Modified_Total_Estimated_Bill")
+    """
+    subset = df[df['Wtr Rate'] == rate_class].copy()
+    
+    # Choose usage binning depending on class
+    if rate_class in ['ORES', 'OCOMM']:
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range_2)
+        revenue_totals = (
+            subset.groupby("UsageRange")[revenue_col]
+            .sum()
+            .reindex(["0–3k", "3–5k", "5k+"])
+        )
+    else:
+        subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
+        revenue_totals = (
+            subset.groupby("UsageRange")[revenue_col]
+            .sum()
+            .reindex(["0–2k", "2–5k", "5k+"])
+        )
+
+    # Pie chart
+    fig, ax = plt.subplots()
+    wedges, _ = ax.pie(
+        revenue_totals,
+        labels=None,
+        autopct=None,
+        startangle=90
+    )
+
+    # Build legend with dollar amounts + percentages
+    total = revenue_totals.sum()
+    legend_labels = [
+        f"{label}: ${value:,.0f} ({value/total:.1%})"
+        for label, value in zip(revenue_totals.index, revenue_totals)
+        if pd.notna(value)
+    ]
+
+    ax.legend(
+        wedges,
+        legend_labels,
+        title="Usage Range",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1)
+    )
+
+    ax.set_title(f"{title_prefix} Revenue Distribution by Usage Tiers")
+    st.pyplot(fig)
+
+
+
+
+
+# --- Usage Distribution by Class ---
+st.subheader("Water Usage Distributions by Usage Tier")
+
+# Ensure Billing Cons numeric (thousands of gallons)
+file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
+
+plot_usage_distribution(file, "IRES",  "IRES")
+plot_usage_distribution(file, "ICOMM", "ICOMM")
+plot_usage_distribution(file, "ORES",  "ORES")
+plot_usage_distribution(file, "OCOMM", "OCOMM")
+
+
+# --- Combined Distribution by Class + Usage ---
+st.subheader("Revenue Distribution by Water Rate Class + Usage Range")
+
+# Apply usage categories for valid classes
+valid_classes = ["IRES", "ORES", "ICOMM", "OCOMM"]
+mask = file['Wtr Rate'].isin(valid_classes)
+
+# Assign usage ranges based on class
+file.loc[mask, "UsageRange"] = file.loc[mask].apply(
+    lambda row: usage_range_2(row["Billing Cons"]) 
+    if row["Wtr Rate"] in ["ORES", "OCOMM"] 
+    else usage_range(row["Billing Cons"]),
+    axis=1
+)
+
+# Build combined category
+file.loc[mask, "Class+Usage"] = (
+    file.loc[mask, "Wtr Rate"] + " " + file.loc[mask, "UsageRange"]
+)
+
+# --- Revenue by Class + Usage ---
+revenue_by_class_usage = (
+    file.loc[mask]
+    .groupby("Class+Usage")["Actual_Total_Bill"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+# Pie chart
+fig8, ax8 = plt.subplots()
+wedges, _ = ax8.pie(
+    revenue_by_class_usage,
+    labels=None,
+    autopct=None,
+    startangle=90
+)
+
+# Legend with dollar values + percentages
+total = revenue_by_class_usage.sum()
+legend_labels = [
+    f"{label}: ${value:,.0f} ({value/total:.1%})"
+    for label, value in zip(revenue_by_class_usage.index, revenue_by_class_usage)
+    if pd.notna(value)
+]
+
+ax8.legend(
+    wedges,
+    legend_labels,
+    title="Class + Usage",
+    loc="center left",
+    bbox_to_anchor=(1, 0, 0.5, 1)
+)
+ax8.set_title("Revenue Distribution by Class + Usage Tier")
+st.pyplot(fig8)
+
+# --- Bar chart of revenue ---
+fig9, ax9 = plt.subplots(figsize=(10,6))
+revenue_by_class_usage.plot(
+    kind="bar",
+    ax=ax9,
+    color="skyblue",
+    edgecolor="black"
+)
+ax9.set_title("Profit by Class + Usage Tier")
+ax9.set_xlabel("Class + Usage Tier")
+ax9.set_ylabel("Profit ($)")
+ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
+st.pyplot(fig9)
+
+# --- Usage by Class + Usage ---
+usage_by_class_usage = (
+    file.loc[mask]
+    .groupby("Class+Usage")["Billing Cons"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+# Bar chart of usage
+fig10, ax10 = plt.subplots(figsize=(10,6))
+usage_by_class_usage.plot(
+    kind="bar",
+    ax=ax10,
+    color="skyblue",
+    edgecolor="black"
+)
+ax10.set_title("Usage by Class + Usage Tier")
+ax10.set_xlabel("Class + Usage Tier")
+ax10.set_ylabel("Usage Amount (Thousands of Gallons)")
+ax10.set_xticklabels(usage_by_class_usage.index, rotation=45, ha="right")
+st.pyplot(fig10)
