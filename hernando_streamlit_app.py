@@ -225,11 +225,25 @@ ax2.set_title("Profit Distribution by Water Rate Class")
 st.pyplot(fig2)
 
 
-
+# --- Profits by Rate Class ---
+st.subheader("Revenue by Water Rate Class (Actual Revenue)")
+file['Wtr Rate'] = file['Wtr Rate'].str.strip()
+# Group by water rate
+profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Estimated_Total_Bill'].sum()
+# Matplotlib Pie Chart
+fig2_5, ax2_5 = plt.subplots()
+ax2_5.pie(
+    profit_by_rate, 
+    labels=profit_by_rate.index, 
+    autopct='%1.1f%%', 
+    startangle=90
+)
+ax2_5.set_title("Profit Distribution by Water Rate Class")
+st.pyplot(fig2_5)
 
 
 # --- Profits by Rate Class ---
-st.subheader("Revenue by Water Rate Class (Estimated Revenue)")
+st.subheader("Revenue by Water Rate Class (Modified Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Modified_Total_Estimated_Bill'].sum()
