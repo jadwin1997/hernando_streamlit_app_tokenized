@@ -11,24 +11,24 @@ import plotly.express as px
 st.title("Hernando Billing Report Analysis")
 
 # --- Sidebar inputs (modify rates) ---
-st.sidebar.header("Modify Water & Sewer Base Rates")
-ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50)
-icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50)
-ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00)
-ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00)
+#st.sidebar.header("Modify Water & Sewer Base Rates")
+ires_base = 0#st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50)
+icomm_base = 0#st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50)
+ores_base = 0#st.sidebar.number_input("Outside City (ORES) base price:", value=16.00)
+ocomm_base = 0#st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00)
 
-st.sidebar.header("Modify Water & Sewer Variable Rates")
-ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (2k–5k):", value=3.15)
-ires_5   = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (>5k):", value=3.50)
+#st.sidebar.header("Modify Water & Sewer Variable Rates")
+ires_2_5 = 0#st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (2k–5k):", value=3.15)
+ires_5   = 0#st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (>5k):", value=3.50)
 
-icomm_2_5 = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (2k–5k):", value=3.15)
-icomm_5   = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (>5k):", value=3.50)
+icomm_2_5 = 0#st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (2k–5k):", value=3.15)
+icomm_5   = 0#st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (>5k):", value=3.50)
 
-ores_2_5= st.sidebar.number_input("Outside City (ORES) price/1000 gallons (3k–5k):", value=3.50)
-ores_5  = st.sidebar.number_input("Outside City (ORES) price/1000 gallons (>5k):", value=3.95)
+ores_2_5= 0#st.sidebar.number_input("Outside City (ORES) price/1000 gallons (3k–5k):", value=3.50)
+ores_5  = 0#st.sidebar.number_input("Outside City (ORES) price/1000 gallons (>5k):", value=3.95)
 
-ocomm_2_5= st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (3k–5k):", value=3.50)
-ocomm_5  = st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (>5k):", value=3.95)
+ocomm_2_5= 0#st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (3k–5k):", value=3.50)
+ocomm_5  = 0#st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (>5k):", value=3.95)
 
 
 # --- GitHub private repo details ---
@@ -168,10 +168,10 @@ def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5,
 def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
-    df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
-    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5), axis=1)
-    df['Actual_Estimated_Diff'] = df['Actual_Total_Bill'] - df['Estimated_Total_Bill']
-    df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
+    #df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
+    #df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5), axis=1)
+    #df['Actual_Estimated_Diff'] = df['Actual_Total_Bill'] - df['Estimated_Total_Bill']
+    #df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
     return df
 
 file = preprocess(raw,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5)
@@ -190,8 +190,8 @@ monthly_totals = file.groupby(file['Period'].dt.to_period('M')).agg({
 st.subheader("Monthly Revenue (Actual vs Estimated vs Modified)")
 fig, ax = plt.subplots(figsize=(10,5))
 monthly_totals['Actual_Total_Bill'].plot(ax=ax, marker='o', label='Actual')
-monthly_totals['Estimated_Total_Bill'].plot(ax=ax, marker='s', linestyle='--', label='Estimated')
-monthly_totals['Modified_Total_Estimated_Bill'].plot(ax=ax, marker='d', linestyle='--', label='Modified')
+#monthly_totals['Estimated_Total_Bill'].plot(ax=ax, marker='s', linestyle='--', label='Estimated')
+#monthly_totals['Modified_Total_Estimated_Bill'].plot(ax=ax, marker='d', linestyle='--', label='Modified')
 ax.set_ylabel("Total Bill ($)")
 ax.set_xlabel("Month")
 ax.legend()
