@@ -266,7 +266,7 @@ def usage_range(g):
 
 file['UsageRange'] = file[file['Wtr Rate']=='IRES']['Billing Cons'].apply(usage_range)
 
-# Group and sum revenue
+# Group and sum thousands of gallons
 revenue_by_usage = file.groupby("UsageRange")["Billing Cons"].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
@@ -291,7 +291,7 @@ file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replac
 file['UsageRange'] = file[file['Wtr Rate']=='ICOMM']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")['Billing Cons'].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig5, ax5 = plt.subplots()
@@ -318,7 +318,7 @@ file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replac
 file['UsageRange'] = file[file['Wtr Rate']=='ORES']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")['Billing Cons'].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig6, ax6 = plt.subplots()
@@ -339,7 +339,7 @@ file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replac
 file['UsageRange'] = file[file['Wtr Rate']=='OCOMM']['Billing Cons'].apply(usage_range)
 
 # Group and sum revenue
-revenue_by_usage = file.groupby("UsageRange")["Actual_Total_Bill"].sum().reindex(["0–2k", "2–5k", "5k+"])
+revenue_by_usage = file.groupby("UsageRange")['Billing Cons'].sum().reindex(["0–2k", "2–5k", "5k+"])
 
 # Pie chart
 fig7, ax7 = plt.subplots()
