@@ -423,11 +423,31 @@ st.pyplot(fig9)
 
 
 
+# Group and sum revenue
+water_by_class_usage = (
+    file.loc[mask]
+    .groupby("Class+Usage")["Billing Cons"]
+    .sum()
+    .sort_values(ascending=False)
+)
 
 
 
+# --- Bar chart ---
+fig10, ax10 = plt.subplots(figsize=(10,6))
+water_by_class_usage.plot(
+    kind="bar",
+    ax=ax10,
+    color="skyblue",
+    edgecolor="black"
+)
 
+ax10.set_title("Usage by Class + Usage Tier")
+ax10.set_xlabel("Class + Usage Tier")
+ax10.set_ylabel("Usage Amount (Gallons)")
+ax10.set_xticklabels(water_by_class_usage.index, rotation=45, ha="right")
 
+st.pyplot(fig10)
 
 
 
