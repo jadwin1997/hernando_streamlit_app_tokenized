@@ -405,6 +405,21 @@ st.pyplot(fig8)
 
 
 
+# --- Bar chart ---
+fig9, ax9 = plt.subplots(figsize=(10,6))
+revenue_by_class_usage.plot(
+    kind="bar",
+    ax=ax9,
+    color="skyblue",
+    edgecolor="black"
+)
+
+ax9.set_title("Profit by Class + Usage Tier")
+ax9.set_xlabel("Class + Usage Tier")
+ax9.set_ylabel("Profit ($)")
+ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
+
+st.pyplot(fig9)
 
 
 
