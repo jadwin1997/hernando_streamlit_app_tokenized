@@ -187,7 +187,7 @@ monthly_totals = file.groupby(file['Period'].dt.to_period('M')).agg({
     #'Modified_Total_Estimated_Bill':'sum'
 })
 
-st.subheader("Monthly Revenue (Actual vs Estimated vs Modified)")
+st.subheader("Monthly Revenue (Actual)")
 fig, ax = plt.subplots(figsize=(10,5))
 monthly_totals['Actual_Total_Bill'].plot(ax=ax, marker='o', label='Actual')
 #monthly_totals['Estimated_Total_Bill'].plot(ax=ax, marker='s', linestyle='--', label='Estimated')
@@ -208,7 +208,7 @@ st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2
 #st.write(f"Difference (Modified - Actual): ${diff_mod:,.2f}")
 
 
-# --- Profits by Rate Class ---
+# --- Revenues by Rate Class ---
 st.subheader("Revenue by Water Rate Class (Actual Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
@@ -221,7 +221,7 @@ ax2.pie(
     autopct='%1.1f%%', 
     startangle=90
 )
-ax2.set_title("Profit Distribution by Water Rate Class")
+ax2.set_title("Revenue Distribution by Water Rate Class")
 st.pyplot(fig2)
 
 
@@ -443,9 +443,9 @@ revenue_by_class_usage.plot(
     color="skyblue",
     edgecolor="black"
 )
-ax9.set_title("Profit by Class + Usage Tier")
+ax9.set_title("Revenue by Class + Usage Tier")
 ax9.set_xlabel("Class + Usage Tier")
-ax9.set_ylabel("Profit ($)")
+ax9.set_ylabel("Revenue ($)")
 ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
 st.pyplot(fig9)
 
