@@ -226,7 +226,7 @@ st.pyplot(fig2)
 
 
 # --- Profits by Rate Class ---
-st.subheader("Revenue by Water Rate Class (Actual Revenue)")
+st.subheader("Revenue by Water Rate Class (Estimated Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Estimated_Total_Bill'].sum()
