@@ -388,9 +388,9 @@ file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replac
 
 # Define usage ranges
 def usage_range(gallons):
-    if gallons < 2000:
+    if gallons < 2:
         return "0–2k"
-    elif gallons < 5000:
+    elif gallons < 5:
         return "2–5k"
     else:
         return "5k+"
