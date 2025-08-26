@@ -263,23 +263,29 @@ def usage_range(g):
         return "2–5k"
     else:
         return "5k+"
+# Filter IRES customers first
+ires_file = file[file['Wtr Rate'] == 'IRES'].copy()
 
-file['UsageRange'] = file[file['Wtr Rate']=='IRES']['Billing Cons'].apply(usage_range)
+# Assign usage range
+ires_file['UsageRange'] = ires_file['Billing Cons'].apply(usage_range)
 
-# Group and sum thousands of gallons
-revenue_by_usage = file.groupby("UsageRange")["Billing Cons"].sum().reindex(["0–2k", "2–5k", "5k+"])
+# Group and sum usage
+revenue_by_usage = (
+    ires_file.groupby("UsageRange")["Billing Cons"]
+    .sum()
+    .reindex(["0–2k", "2–5k", "5k+"])
+)
 
 # Pie chart
 fig4, ax4 = plt.subplots()
 ax4.pie(
-    revenue_by_usage, 
-    labels=revenue_by_usage.index, 
+    revenue_by_usage,
+    labels=revenue_by_usage.index,
     autopct='%1.1f%%',
     startangle=90
 )
-ax4.set_title("Water Usage Distribution by Usage Tiers")
+ax4.set_title("Water Usage Distribution by Usage Tiers (IRES only)")
 st.pyplot(fig4)
-
 
 
 # --- Distribution of Revenue by Usage Range ---
