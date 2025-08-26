@@ -405,7 +405,10 @@ plot_usage_distribution(file, "IRES",  "IRES")
 plot_usage_distribution(file, "ICOMM", "ICOMM")
 plot_usage_distribution(file, "ORES",  "ORES")
 plot_usage_distribution(file, "OCOMM", "OCOMM")
-
+plot_revenue_distribution(file, "IRES",  "IRES")
+plot_revenue_distribution(file, "ICOMM", "ICOMM")
+plot_revenue_distribution(file, "ORES",  "ORES")
+plot_revenue_distribution(file, "OCOMM", "OCOMM")
 
 # --- Combined Distribution by Class + Usage ---
 st.subheader("Revenue Distribution by Water Rate Class + Usage Range")
