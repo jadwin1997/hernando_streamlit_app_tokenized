@@ -369,14 +369,32 @@ revenue_by_class_usage = (
 
 # Pie chart
 fig8, ax8 = plt.subplots()
-ax8.pie(
+wedges, _ = ax8.pie(
     revenue_by_class_usage,
-    labels=revenue_by_class_usage.index,
-    autopct='%1.1f%%',
+    labels=None,    # no labels on slices
+    autopct=None,   # no text inside
     startangle=90
 )
+
+# Build legend with values + percentages
+total = revenue_by_class_usage.sum()
+legend_labels = [
+    f"{label}: ${value:,.0f} ({value/total:.1%})"
+    for label, value in zip(revenue_by_class_usage.index, revenue_by_class_usage)
+    if pd.notna(value)
+]
+
+ax8.legend(
+    wedges,
+    legend_labels,
+    title="Class + Usage",
+    loc="center left",
+    bbox_to_anchor=(1, 0, 0.5, 1)
+)
+
 ax8.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig8)
+
 
 # Bar chart of revenue
 fig9, ax9 = plt.subplots(figsize=(10,6))
