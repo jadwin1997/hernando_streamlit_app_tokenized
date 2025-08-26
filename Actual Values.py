@@ -405,6 +405,9 @@ plot_usage_distribution(file, "IRES",  "IRES")
 plot_usage_distribution(file, "ICOMM", "ICOMM")
 plot_usage_distribution(file, "ORES",  "ORES")
 plot_usage_distribution(file, "OCOMM", "OCOMM")
+
+# --- Usage Distribution by Class ---
+st.subheader("Revenue Distributions by Usage Tier")
 plot_revenue_distribution(file, "IRES",  "IRES")
 plot_revenue_distribution(file, "ICOMM", "ICOMM")
 plot_revenue_distribution(file, "ORES",  "ORES")
