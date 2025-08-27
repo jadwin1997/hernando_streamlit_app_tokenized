@@ -129,7 +129,7 @@ def check_estimated(row):
         return round(water_charge + sewer_charge, 2)
     return 0
 
-def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
+""" def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
     def _fn(row):
         gallons = int(str(row["Billing Cons"]).replace(',',''))
         wtr_rate = str(row["Wtr Rate"]).upper().strip()
@@ -181,6 +181,85 @@ def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5,
                 return check_actual(row)
             return round(water_charge + sewer_charge, 2)
         return 0
+    return _fn """
+def make_modified_fn(
+    ires_base, icomm_base, ores_base, ocomm_base,
+    ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
+    icomm_t1_max, icomm_t2_max, icomm_t2_rate, icomm_t3_rate,
+    ores_t1_max, ores_t2_max, ores_t2_rate, ores_t3_rate,
+    ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate
+):
+    def _fn(row):
+        gallons = int(str(row["Billing Cons"]).replace(',', ''))
+        wtr_rate = str(row["Wtr Rate"]).upper().strip()
+        swr_rate = str(row["Swr Rate"]).upper().strip()
+        water_charge = 0
+
+        if 'ACTIVE' in str(row['Status'])[:6]:
+            # WATER (with user-modifiable rates)
+            if wtr_rate == "IRES":
+                if gallons <= ires_t1_max:
+                    water_charge = ires_base
+                elif gallons <= ires_t2_max:
+                    water_charge = ires_base + (gallons - ires_t1_max) * ires_t2_rate
+                else:
+                    water_charge = (
+                        ires_base
+                        + (ires_t2_max - ires_t1_max) * ires_t2_rate
+                        + (gallons - ires_t2_max) * ires_t3_rate
+                    )
+
+            elif wtr_rate == "ICOMM":
+                if gallons <= icomm_t1_max:
+                    water_charge = icomm_base
+                elif gallons <= icomm_t2_max:
+                    water_charge = icomm_base + (gallons - icomm_t1_max) * icomm_t2_rate
+                else:
+                    water_charge = (
+                        icomm_base
+                        + (icomm_t2_max - icomm_t1_max) * icomm_t2_rate
+                        + (gallons - icomm_t2_max) * icomm_t3_rate
+                    )
+
+            elif wtr_rate == "ORES":
+                if gallons <= ores_t1_max:
+                    water_charge = ores_base
+                elif gallons <= ores_t2_max:
+                    water_charge = ores_base + (gallons - ores_t1_max) * ores_t2_rate
+                else:
+                    water_charge = (
+                        ores_base
+                        + (ores_t2_max - ores_t1_max) * ores_t2_rate
+                        + (gallons - ores_t2_max) * ores_t3_rate
+                    )
+
+            elif wtr_rate == "OCOMM":
+                if gallons <= ocomm_t1_max:
+                    water_charge = ocomm_base
+                elif gallons <= ocomm_t2_max:
+                    water_charge = ocomm_base + (gallons - ocomm_t1_max) * ocomm_t2_rate
+                else:
+                    water_charge = (
+                        ocomm_base
+                        + (ocomm_t2_max - ocomm_t1_max) * ocomm_t2_rate
+                        + (gallons - ocomm_t2_max) * ocomm_t3_rate
+                    )
+
+            else:
+                return check_actual(row)
+
+            # SEWER (same as before)
+            dcrua = clean_amt(row['DCRUA Amt'])
+            if swr_rate in ["IRES", "ICOMM"]:
+                sewer_charge = max(water_charge / 2, 6.25) + dcrua
+            elif swr_rate in ["ORES", "OCOMM"]:
+                sewer_charge = max(water_charge / 2, 8.00) + dcrua
+            else:
+                return check_actual(row)
+
+            return round(water_charge + sewer_charge, 2)
+
+        return 0
     return _fn
 
 @st.cache_data
@@ -188,7 +267,36 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
-    df['Modified_Total_Estimated_Bill'] = df.apply(make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5), axis=1)
+    #call the refactored make_modified_fn with dynamic tier values
+    modified_fn = make_modified_fn(
+        ires_base=ires_base,
+        icomm_base=icomm_base,
+        ores_base=ores_base,
+        ocomm_base=ocomm_base,
+        
+        ires_t1_max=ires_tier1,
+        ires_t2_max=ires_tier2,
+        ires_t2_rate=ires_2_5,
+        ires_t3_rate=ires_5,
+        
+        icomm_t1_max=ICOMM_tier1,
+        icomm_t2_max=ICOMM_tier2,
+        icomm_t2_rate=icomm_2_5,
+        icomm_t3_rate=icomm_5,
+        
+        ores_t1_max=ORES_tier1,
+        ores_t2_max=ORES_tier2,
+        ores_t2_rate=ores_2_5,
+        ores_t3_rate=ores_5,
+        
+        ocomm_t1_max=OCOMM_tier1,
+        ocomm_t2_max=OCOMM_tier2,
+        ocomm_t2_rate=ocomm_2_5,
+        ocomm_t3_rate=ocomm_5
+    )
+
+    # Apply the function row-wise to your DataFrame
+    df['Modified_Total_Estimated_Bill'] = df.apply(modified_fn, axis=1)
     df['Actual_Estimated_Diff'] = df['Actual_Total_Bill'] - df['Estimated_Total_Bill']
     df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
     return df
