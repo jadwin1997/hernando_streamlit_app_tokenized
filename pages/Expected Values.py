@@ -393,8 +393,6 @@ def plot_revenue_distribution(df, rate_class, title_prefix, revenue_col="Actual_
 
 
 
-
-
 # --- Usage Distribution by Class ---
 st.subheader("Water Usage Distributions by Usage Tier")
 
@@ -503,4 +501,88 @@ ax10.set_title("Usage by Class + Usage Tier")
 ax10.set_xlabel("Class + Usage Tier")
 ax10.set_ylabel("Usage Amount (Thousands of Gallons)")
 ax10.set_xticklabels(usage_by_class_usage.index, rotation=45, ha="right")
+st.pyplot(fig10)
+
+
+
+
+# --- Usage Distribution by Class (Using Modified Values) ---
+st.subheader("Revenue Distributions by Usage Tier")
+plot_revenue_distribution(file, "IRES",  "IRES", revenue_col="Modified_Total_Estimated_Bill")
+plot_revenue_distribution(file, "ICOMM", "ICOMM", revenue_col="Modified_Total_Estimated_Bill")
+plot_revenue_distribution(file, "ORES",  "ORES", revenue_col="Modified_Total_Estimated_Bill")
+plot_revenue_distribution(file, "OCOMM", "OCOMM", revenue_col="Modified_Total_Estimated_Bill")
+
+
+
+# --- Combined Distribution by Class + Usage ---
+st.subheader("Revenue Distribution by Water Rate Class + Usage Range")
+
+# Apply usage categories for valid classes
+valid_classes = ["IRES", "ORES", "ICOMM", "OCOMM"]
+mask = file['Wtr Rate'].isin(valid_classes)
+
+# Assign usage ranges based on class
+file.loc[mask, "UsageRange"] = file.loc[mask].apply(
+    lambda row: usage_range_2(row["Billing Cons"]) 
+    if row["Wtr Rate"] in ["ORES", "OCOMM"] 
+    else usage_range(row["Billing Cons"]),
+    axis=1
+)
+
+# Build combined category
+file.loc[mask, "Class+Usage"] = (
+    file.loc[mask, "Wtr Rate"] + " " + file.loc[mask, "UsageRange"]
+)
+
+# --- Revenue by Class + Usage ---
+revenue_by_class_usage = (
+    file.loc[mask]
+    .groupby("Class+Usage")["Modified_Total_Estimated_Bill"]
+    .sum()
+    .sort_values(ascending=False)
+)
+
+# Pie chart
+fig8, ax8 = plt.subplots()
+wedges, _ = ax8.pie(
+    revenue_by_class_usage,
+    labels=None,
+    autopct=None,
+    startangle=90
+)
+
+# Legend with dollar values + percentages
+total = revenue_by_class_usage.sum()
+legend_labels = [
+    f"{label}: ${value:,.0f} ({value/total:.1%})"
+    for label, value in zip(revenue_by_class_usage.index, revenue_by_class_usage)
+    if pd.notna(value)
+]
+
+ax8.legend(
+    wedges,
+    legend_labels,
+    title="Class + Usage",
+    loc="center left",
+    bbox_to_anchor=(1, 0, 0.5, 1)
+)
+ax8.set_title("Revenue Distribution by Class + Usage Tier")
+st.pyplot(fig8)
+
+# --- Bar chart of revenue ---
+fig9, ax9 = plt.subplots(figsize=(10,6))
+revenue_by_class_usage.plot(
+    kind="bar",
+    ax=ax9,
+    color="skyblue",
+    edgecolor="black"
+)
+ax9.set_title("Revenue by Class + Usage Tier")
+ax9.set_xlabel("Class + Usage Tier")
+ax9.set_ylabel("Revenue ($)")
+ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
+st.pyplot(fig9)
+
+
 st.pyplot(fig10)
