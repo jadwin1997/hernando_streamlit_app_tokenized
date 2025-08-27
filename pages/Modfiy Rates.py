@@ -713,22 +713,6 @@ ax8.legend(
 )
 ax8.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig8)
-
-# --- Bar chart of revenue ---
-fig9, ax9 = plt.subplots(figsize=(10,6))
-revenue_by_class_usage.plot(
-    kind="bar",
-    ax=ax9,
-    color="skyblue",
-    edgecolor="black"
-)
-ax9.set_title("Profit by Class + Usage Tier")
-ax9.set_xlabel("Class + Usage Tier")
-ax9.set_ylabel("Profit ($)")
-ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
-st.pyplot(fig9)
-
-
 # --- Usage by Class + Dynamic Usage Tiers ---
 st.subheader("Water Usage Distribution by Water Rate Class + Dynamic Usage Tiers")
 
@@ -767,6 +751,22 @@ ax_usage.legend(
 )
 ax_usage.set_title("Water Usage Distribution by Class + Usage Tier")
 st.pyplot(fig_usage)
+
+# --- Bar chart of revenue ---
+fig9, ax9 = plt.subplots(figsize=(10,6))
+revenue_by_class_usage.plot(
+    kind="bar",
+    ax=ax9,
+    color="skyblue",
+    edgecolor="black"
+)
+ax9.set_title("Profit by Class + Usage Tier")
+ax9.set_xlabel("Class + Usage Tier")
+ax9.set_ylabel("Profit ($)")
+ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
+st.pyplot(fig9)
+
+
 
 
 # --- Usage by Class + Usage ---
