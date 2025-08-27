@@ -12,27 +12,11 @@ st.title("Hernando Billing Report Analysis")
 
 
 
+
+
+ # --- Sidebar inputs (modify rates) ---
 st.sidebar.header("Modify Water & Sewer Base Rates")
-
-if "ires_base" not in st.session_state:
-    st.session_state.ires_base = 12.50
-if "icomm_base" not in st.session_state:
-    st.session_state.icomm_base = 12.50
-if "ores_base" not in st.session_state:
-    st.session_state.ores_base = 16.00
-if "ocomm_base" not in st.session_state:
-    st.session_state.ocomm_base = 16.00
-
-ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", key="ires_base")
-icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", key="icomm_base")
-ores_base = st.sidebar.number_input("Outside City (ORES) base price:", key="ores_base")
-ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", key="ocomm_base")
-
-
-
-""" # --- Sidebar inputs (modify rates) ---
-st.sidebar.header("Modify Water & Sewer Base Rates")
-ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50)
+ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50, key='ires_base')
 icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50)
 ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00)
 ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00)
@@ -49,7 +33,7 @@ ores_5  = st.sidebar.number_input("Outside City (ORES) price/1000 gallons (>5k):
 
 ocomm_2_5= st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (3k–5k):", value=3.50)
 ocomm_5  = st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (>5k):", value=3.95)
- """
+
 
 # --- GitHub private repo details ---
 GITHUB_OWNER = "jadwin1997"
