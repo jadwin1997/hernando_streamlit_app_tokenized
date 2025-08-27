@@ -129,59 +129,59 @@ def check_estimated(row):
         return round(water_charge + sewer_charge, 2)
     return 0
 
-""" def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
-    def _fn(row):
-        gallons = int(str(row["Billing Cons"]).replace(',',''))
-        wtr_rate = str(row["Wtr Rate"]).upper().strip()
-        swr_rate = str(row["Swr Rate"]).upper().strip()
-        water_charge = 0
-        if 'ACTIVE' in str(row['Status'])[:6]:
-            # WATER (with user-modifiable rates)
-            if wtr_rate in ["IRES", "ICOMM"]:
-                if gallons <= 2:
-                    if(wtr_rate == "IRES"):
-                        water_charge = ires_base
-                    else:
-                        water_charge = icomm_base
-                elif gallons <= 5:
-                    if(wtr_rate == "IRES"):
-                        water_charge = ires_base + (gallons - 2) * ires_2_5
-                    else:
-                        water_charge = icomm_base + (gallons - 2) * icomm_2_5
-                else:
-                    if(wtr_rate == "IRES"):
-                        water_charge = ires_base + (3 * ires_2_5) + (gallons - 5) * ires_5
-                    else:
-                        water_charge = icomm_base + (3 * icomm_2_5) + (gallons - 5) * icomm_5
-            elif wtr_rate in ["ORES", "OCOMM"]:
-                if gallons <= 3:
-                    if(wtr_rate == "ORES"):
-                        water_charge = ores_base
-                    else:
-                        water_charge = ocomm_base
-                elif gallons <= 5:
-                    if(wtr_rate == "ORES"):
-                        water_charge = ores_base + (gallons - 3) * ores_2_5
-                    else:
-                        water_charge = ocomm_base + (gallons - 3) * ocomm_2_5
+# """ def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
+#     def _fn(row):
+#         gallons = int(str(row["Billing Cons"]).replace(',',''))
+#         wtr_rate = str(row["Wtr Rate"]).upper().strip()
+#         swr_rate = str(row["Swr Rate"]).upper().strip()
+#         water_charge = 0
+#         if 'ACTIVE' in str(row['Status'])[:6]:
+#             # WATER (with user-modifiable rates)
+#             if wtr_rate in ["IRES", "ICOMM"]:
+#                 if gallons <= 2:
+#                     if(wtr_rate == "IRES"):
+#                         water_charge = ires_base
+#                     else:
+#                         water_charge = icomm_base
+#                 elif gallons <= 5:
+#                     if(wtr_rate == "IRES"):
+#                         water_charge = ires_base + (gallons - 2) * ires_2_5
+#                     else:
+#                         water_charge = icomm_base + (gallons - 2) * icomm_2_5
+#                 else:
+#                     if(wtr_rate == "IRES"):
+#                         water_charge = ires_base + (3 * ires_2_5) + (gallons - 5) * ires_5
+#                     else:
+#                         water_charge = icomm_base + (3 * icomm_2_5) + (gallons - 5) * icomm_5
+#             elif wtr_rate in ["ORES", "OCOMM"]:
+#                 if gallons <= 3:
+#                     if(wtr_rate == "ORES"):
+#                         water_charge = ores_base
+#                     else:
+#                         water_charge = ocomm_base
+#                 elif gallons <= 5:
+#                     if(wtr_rate == "ORES"):
+#                         water_charge = ores_base + (gallons - 3) * ores_2_5
+#                     else:
+#                         water_charge = ocomm_base + (gallons - 3) * ocomm_2_5
 
-                else:
-                    if(wtr_rate == "ORES"):
-                        water_charge = ores_base + (2 * ores_2_5) + (gallons - 5) * ores_5
-                    else: 
-                        water_charge = ocomm_base + (2 * ocomm_2_5) + (gallons - 5) * ocomm_5
-            else:
-                return check_actual(row)
-            dcrua = clean_amt(row['DCRUA Amt'])
-            if swr_rate in ["IRES", "ICOMM"]:
-                sewer_charge = max(water_charge / 2, 6.25) + dcrua
-            elif swr_rate in ["ORES", "OCOMM"]:
-                sewer_charge = max(water_charge / 2, 8.00) + dcrua
-            else:
-                return check_actual(row)
-            return round(water_charge + sewer_charge, 2)
-        return 0
-    return _fn """
+#                 else:
+#                     if(wtr_rate == "ORES"):
+#                         water_charge = ores_base + (2 * ores_2_5) + (gallons - 5) * ores_5
+#                     else: 
+#                         water_charge = ocomm_base + (2 * ocomm_2_5) + (gallons - 5) * ocomm_5
+#             else:
+#                 return check_actual(row)
+#             dcrua = clean_amt(row['DCRUA Amt'])
+#             if swr_rate in ["IRES", "ICOMM"]:
+#                 sewer_charge = max(water_charge / 2, 6.25) + dcrua
+#             elif swr_rate in ["ORES", "OCOMM"]:
+#                 sewer_charge = max(water_charge / 2, 8.00) + dcrua
+#             else:
+#                 return check_actual(row)
+#             return round(water_charge + sewer_charge, 2)
+#         return 0
+#     return _fn 
 def make_modified_fn(
     ires_base, icomm_base, ores_base, ocomm_base,
     ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
