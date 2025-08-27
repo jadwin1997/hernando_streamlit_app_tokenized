@@ -30,17 +30,17 @@ ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.
 ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00, key='ocomm_base_price')
 
 st.sidebar.header("Modify Water & Sewer Variable Rates")
-ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (2k–5k):", value=3.15)
-ires_5   = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (>5k):", value=3.50)
+ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (tier 1)(default 2k–5k):", value=3.15)
+ires_5   = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (tier 2)(default >5k):", value=3.50)
 
-icomm_2_5 = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (2k–5k):", value=3.15)
-icomm_5   = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (>5k):", value=3.50)
+icomm_2_5 = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (tier 1)(default 2k–5k):", value=3.15)
+icomm_5   = st.sidebar.number_input("Inside City Commercial (ICOMM) price/1000 gallons (tier 2)(default >5k):", value=3.50)
 
-ores_2_5= st.sidebar.number_input("Outside City (ORES) price/1000 gallons (3k–5k):", value=3.50)
-ores_5  = st.sidebar.number_input("Outside City (ORES) price/1000 gallons (>5k):", value=3.95)
+ores_2_5= st.sidebar.number_input("Outside City (ORES) price/1000 gallons (tier 1)(default 3k–5k):", value=3.50)
+ores_5  = st.sidebar.number_input("Outside City (ORES) price/1000 gallons (tier 2)(default >5k):", value=3.95)
 
-ocomm_2_5= st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (3k–5k):", value=3.50)
-ocomm_5  = st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (>5k):", value=3.95)
+ocomm_2_5= st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (tier 1)(default 3k–5k):", value=3.50)
+ocomm_5  = st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (tier 2)(default >5k):", value=3.95)
 
 #Sidebar inputs Usage Tier definitions
 st.sidebar.header("Usage Tier Definitions")
