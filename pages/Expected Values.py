@@ -38,15 +38,15 @@ ocomm_5  = st.sidebar.number_input("Outside City (OCOMM) price/1000 gallons (>5k
 st.sidebar.header("Usage Tier Definitions")
 
 # IRES + ICOMM (inside city) usage tiers
-ires_tier1 = st.sidebar.number_input("IRES/ICOMM Tier 1 max (k gallons):", value=2, step=1)
-ires_tier2 = st.sidebar.number_input("IRES/ICOMM Tier 2 max (k gallons):", value=5, step=1)
-ICOMM_tier1 = st.sidebar.number_input("IRES/ICOMM Tier 1 max (k gallons):", value=2, step=1)
-ICOMM_tier2 = st.sidebar.number_input("IRES/ICOMM Tier 2 max (k gallons):", value=5, step=1)
+ires_tier1 = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1)
+ires_tier2 = st.sidebar.number_input("IRES Tier 2 max (k gallons):", value=5, step=1)
+ICOMM_tier1 = st.sidebar.number_input("ICOMM Tier 1 max (k gallons):", value=2, step=1)
+ICOMM_tier2 = st.sidebar.number_input("ICOMM Tier 2 max (k gallons):", value=5, step=1)
 # ORES + OCOMM (outside city) usage tiers
-ORES_tier1 = st.sidebar.number_input("ORES/OCOMM Tier 1 max (k gallons):", value=3, step=1)
-ORES_tier2 = st.sidebar.number_input("ORES/OCOMM Tier 2 max (k gallons):", value=5, step=1)
-OCOMM_tier1 = st.sidebar.number_input("ORES/OCOMM Tier 1 max (k gallons):", value=3, step=1)
-OCOMM_tier2 = st.sidebar.number_input("ORES/OCOMM Tier 2 max (k gallons):", value=5, step=1)
+ORES_tier1 = st.sidebar.number_input("ORES Tier 1 max (k gallons):", value=3, step=1)
+ORES_tier2 = st.sidebar.number_input("ORES Tier 2 max (k gallons):", value=5, step=1)
+OCOMM_tier1 = st.sidebar.number_input("OCOMM Tier 1 max (k gallons):", value=3, step=1)
+OCOMM_tier2 = st.sidebar.number_input("OCOMM Tier 2 max (k gallons):", value=5, step=1)
 
 
 
