@@ -744,7 +744,8 @@ st.pyplot(fig10)
 
 
 
-st.markdown("---")
+st.divider()
+st.header("Start of Section 2: Using Modified Revenue Define by User")
 
 # --- Usage Distribution by Class (Using Modified Values) ---
 st.subheader("Revenue Distributions by Usage Tier (Using Modified Revenue + Dynamic Usage Tiers)")
