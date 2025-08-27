@@ -538,7 +538,7 @@ file.loc[mask, "Class+Usage"] = (
 # --- Revenue by Class + Usage ---
 revenue_by_class_usage = (
     file.loc[mask]
-    .groupby("Class+Usage")["Modified_Total_Estimated_Bill"]
+    .groupby("Class+Usage")["Actual_Total_Bill"]
     .sum()
     .sort_values(ascending=False)
 )
@@ -578,11 +578,8 @@ revenue_by_class_usage.plot(
     color="skyblue",
     edgecolor="black"
 )
-ax9.set_title("Revenue by Class + Usage Tier")
+ax9.set_title("Profit by Class + Usage Tier")
 ax9.set_xlabel("Class + Usage Tier")
-ax9.set_ylabel("Revenue ($)")
+ax9.set_ylabel("Profit ($)")
 ax9.set_xticklabels(revenue_by_class_usage.index, rotation=45, ha="right")
 st.pyplot(fig9)
-
-
-st.pyplot(fig10)
