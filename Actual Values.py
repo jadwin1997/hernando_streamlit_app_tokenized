@@ -9,6 +9,15 @@ import requests
 import base64
 import plotly.express as px
 st.title("Hernando Billing Report Analysis")
+st.markdown("""
+**Instructions:**
+- Graphs/Sections labeled "Actual" use actual billing amounts from the data.
+- Graphs/Sections labeled "Estimated" use the estimated billing amounts from the data.
+- Graphs/Sections labeled "Modified" use user-modified rates to recalculate estimated billing amounts.         
+- Please note that changing Usage Tier rates will affect both Estimated and Modified graphs/sections.
+            
+- To access the modifiable rates, click the arrow on the top left to open the sidebar. Go to the Modify Rates section and input new rates as desired.
+""")
 
 # --- Sidebar inputs (modify rates) ---
 #st.sidebar.header("Modify Water & Sewer Base Rates")
