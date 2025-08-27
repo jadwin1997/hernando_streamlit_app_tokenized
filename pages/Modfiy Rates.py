@@ -24,10 +24,10 @@ st.markdown("""
 
  # --- Sidebar inputs (modify rates) ---
 st.sidebar.header("Modify Water & Sewer Base Rates")
-ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50, key='ires_base')
-icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50)
-ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00)
-ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00)
+ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50, key='ires_base_price')
+icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50, key='icomm_base_price')
+ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00, key='ores_base_price')
+ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00, key='ocomm_base_price')
 
 st.sidebar.header("Modify Water & Sewer Variable Rates")
 ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (2k–5k):", value=3.15)
@@ -826,6 +826,44 @@ ax8.legend(
 )
 ax8.set_title("Revenue Distribution by Class + Usage Tier")
 st.pyplot(fig8)
+# --- Usage by Class + Dynamic Usage Tiers ---
+st.subheader("Water Usage Distribution by Water Rate Class + Dynamic Usage Tiers")
+
+# Use the same mask and "Class+Usage" you already created
+# Aggregate by usage instead of revenue
+usage_by_class_usage = (
+    file.loc[mask]
+    .groupby("Class+Usage")["Billing Cons"]  # <- change here
+    .sum()
+    .sort_values(ascending=False)
+)
+
+# Pie chart for usage
+fig_usage, ax_usage = plt.subplots()
+wedges, _ = ax_usage.pie(
+    usage_by_class_usage,
+    labels=None,
+    autopct=None,
+    startangle=90
+)
+
+# Legend with values + percentages
+total_usage = usage_by_class_usage.sum()
+legend_labels = [
+    f"{label}: {value:,.0f}k gallons ({value/total_usage:.1%})"
+    for label, value in zip(usage_by_class_usage.index, usage_by_class_usage)
+    if pd.notna(value)
+]
+
+ax_usage.legend(
+    wedges,
+    legend_labels,
+    title="Class + Usage",
+    loc="center left",
+    bbox_to_anchor=(1, 0, 0.5, 1)
+)
+ax_usage.set_title("Water Usage Distribution by Class + Usage Tier")
+st.pyplot(fig_usage)
 
 # --- Bar chart of revenue ---
 fig9, ax9 = plt.subplots(figsize=(10,6))
