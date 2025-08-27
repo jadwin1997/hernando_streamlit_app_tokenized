@@ -747,7 +747,7 @@ st.pyplot(fig10)
 st.markdown("---")
 
 # --- Usage Distribution by Class (Using Modified Values) ---
-st.subheader("Revenue Distributions by Usage Tier (Using Modified Revenue)")
+st.subheader("Revenue Distributions by Usage Tier (Using Modified Revenue + Dynamic Usage Tiers)")
 plot_revenue_distribution(file, "IRES",  "IRES",ires_tier1,ires_tier2, revenue_col="Modified_Total_Estimated_Bill")
 plot_revenue_distribution(file, "ICOMM", "ICOMM",ICOMM_tier1,ICOMM_tier2, revenue_col="Modified_Total_Estimated_Bill")
 plot_revenue_distribution(file, "ORES",  "ORES", ORES_tier1,ORES_tier2,revenue_col="Modified_Total_Estimated_Bill")
@@ -756,7 +756,7 @@ plot_revenue_distribution(file, "OCOMM", "OCOMM",OCOMM_tier1,OCOMM_tier2, revenu
 
 
 # --- Combined Distribution by Class + Usage ---
-st.subheader("Revenue Distribution by Water Rate Class + Usage Range")
+st.subheader("Revenue Distribution by Water Rate Class + Dynamic Usage Tiers")
 
 # Apply usage categories for valid classes
 valid_classes = ["IRES", "ORES", "ICOMM", "OCOMM"]
