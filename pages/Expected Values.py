@@ -538,7 +538,7 @@ file.loc[mask, "Class+Usage"] = (
 # --- Revenue by Class + Usage ---
 revenue_by_class_usage = (
     file.loc[mask]
-    .groupby("Class+Usage")["Actual_Total_Bill"]
+    .groupby("Class+Usage")["Modified_Total_Estimated_Bill"]
     .sum()
     .sort_values(ascending=False)
 )
