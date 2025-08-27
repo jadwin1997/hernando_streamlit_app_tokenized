@@ -394,7 +394,7 @@ def plot_revenue_distribution(df, rate_class, title_prefix, revenue_col="Actual_
 
 
 # --- Usage Distribution by Class ---
-st.subheader("Water Usage Distributions by Usage Tier")
+st.subheader("Water Usage Distributions by Usage Tier (Actual Usage)")
 
 # Ensure Billing Cons numeric (thousands of gallons)
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
@@ -405,7 +405,7 @@ plot_usage_distribution(file, "ORES",  "ORES")
 plot_usage_distribution(file, "OCOMM", "OCOMM")
 
 # --- Usage Distribution by Class ---
-st.subheader("Revenue Distributions by Usage Tier")
+st.subheader("Revenue Distributions by Usage Tier (Actual Revenue)")
 plot_revenue_distribution(file, "IRES",  "IRES")
 plot_revenue_distribution(file, "ICOMM", "ICOMM")
 plot_revenue_distribution(file, "ORES",  "ORES")
@@ -507,7 +507,7 @@ st.pyplot(fig10)
 
 
 # --- Usage Distribution by Class (Using Modified Values) ---
-st.subheader("Revenue Distributions by Usage Tier")
+st.subheader("Revenue Distributions by Usage Tier (Using Modified Revenue)")
 plot_revenue_distribution(file, "IRES",  "IRES", revenue_col="Modified_Total_Estimated_Bill")
 plot_revenue_distribution(file, "ICOMM", "ICOMM", revenue_col="Modified_Total_Estimated_Bill")
 plot_revenue_distribution(file, "ORES",  "ORES", revenue_col="Modified_Total_Estimated_Bill")
