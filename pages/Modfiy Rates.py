@@ -137,59 +137,7 @@ def check_estimated(row):
         return round(water_charge + sewer_charge, 2)
     return 0
 
-# """ def make_modified_fn(ires_base,icomm_base,ores_base,ocomm_base,ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5):
-#     def _fn(row):
-#         gallons = int(str(row["Billing Cons"]).replace(',',''))
-#         wtr_rate = str(row["Wtr Rate"]).upper().strip()
-#         swr_rate = str(row["Swr Rate"]).upper().strip()
-#         water_charge = 0
-#         if 'ACTIVE' in str(row['Status'])[:6]:
-#             # WATER (with user-modifiable rates)
-#             if wtr_rate in ["IRES", "ICOMM"]:
-#                 if gallons <= 2:
-#                     if(wtr_rate == "IRES"):
-#                         water_charge = ires_base
-#                     else:
-#                         water_charge = icomm_base
-#                 elif gallons <= 5:
-#                     if(wtr_rate == "IRES"):
-#                         water_charge = ires_base + (gallons - 2) * ires_2_5
-#                     else:
-#                         water_charge = icomm_base + (gallons - 2) * icomm_2_5
-#                 else:
-#                     if(wtr_rate == "IRES"):
-#                         water_charge = ires_base + (3 * ires_2_5) + (gallons - 5) * ires_5
-#                     else:
-#                         water_charge = icomm_base + (3 * icomm_2_5) + (gallons - 5) * icomm_5
-#             elif wtr_rate in ["ORES", "OCOMM"]:
-#                 if gallons <= 3:
-#                     if(wtr_rate == "ORES"):
-#                         water_charge = ores_base
-#                     else:
-#                         water_charge = ocomm_base
-#                 elif gallons <= 5:
-#                     if(wtr_rate == "ORES"):
-#                         water_charge = ores_base + (gallons - 3) * ores_2_5
-#                     else:
-#                         water_charge = ocomm_base + (gallons - 3) * ocomm_2_5
 
-#                 else:
-#                     if(wtr_rate == "ORES"):
-#                         water_charge = ores_base + (2 * ores_2_5) + (gallons - 5) * ores_5
-#                     else: 
-#                         water_charge = ocomm_base + (2 * ocomm_2_5) + (gallons - 5) * ocomm_5
-#             else:
-#                 return check_actual(row)
-#             dcrua = clean_amt(row['DCRUA Amt'])
-#             if swr_rate in ["IRES", "ICOMM"]:
-#                 sewer_charge = max(water_charge / 2, 6.25) + dcrua
-#             elif swr_rate in ["ORES", "OCOMM"]:
-#                 sewer_charge = max(water_charge / 2, 8.00) + dcrua
-#             else:
-#                 return check_actual(row)
-#             return round(water_charge + sewer_charge, 2)
-#         return 0
-#     return _fn 
 def make_modified_fn(
     ires_base, icomm_base, ores_base, ocomm_base,
     ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
@@ -397,28 +345,7 @@ st.pyplot(fig3)
 
 
 
-# # --- Consistent Usage Range Helper ---
-# def usage_range(g):
-#     """Assign usage tier based on thousands of gallons."""
-#     if pd.isna(g):
-#         return None
-#     if g <= 2:
-#         return "0–2k"
-#     elif g <= 5:
-#         return "2–5k"
-#     else:
-#         return "5k+"
-# # --- Consistent Usage Range Helper ---
-# def usage_range_2(g):
-#     """Assign usage tier based on thousands of gallons."""
-#     if pd.isna(g):
-#         return None
-#     if g <= 3:
-#         return "0–3k"
-#     elif g <= 5:
-#         return "3–5k"
-#     else:
-#         return "5k+"
+
     
 def usage_range_dynamic(g, t1, t2):
     """Generic usage tier assignment using dynamic thresholds."""
@@ -431,112 +358,6 @@ def usage_range_dynamic(g, t1, t2):
     else:
         return f"{t2}k+"
 
-
-
-# def plot_usage_distribution(df, rate_class, title_prefix):
-#     """
-#     Filter df for a given water rate class, assign usage ranges, and plot pie chart with legend.
-#     """
-#     subset = df[df['Wtr Rate'] == rate_class].copy()
-#     if(rate_class == 'ORES' or rate_class == 'OCOMM'):
-#         subset['UsageRange'] = subset['Billing Cons'].apply(usage_range_2)
-#         usage_totals = (
-#             subset.groupby("UsageRange")["Billing Cons"]
-#             .sum()
-#             .reindex(["0–3k", "3–5k", "5k+"])
-#         )
-#     else:
-#         subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
-#         usage_totals = (
-#             subset.groupby("UsageRange")["Billing Cons"]
-#             .sum()
-#             .reindex(["0–2k", "2–5k", "5k+"])
-#         )
-
-#     fig, ax = plt.subplots()
-#     wedges, _ = ax.pie(
-#         usage_totals,
-#         labels=None,       # no labels on the slices
-#         autopct=None,      # no text inside
-#         startangle=90
-#     )
-
-#     # Build legend with percentages
-#     total = usage_totals.sum()
-#     legend_labels = [
-#         f"{label}: {value:,.0f} ({value/total:.1%})"
-#         for label, value in zip(usage_totals.index, usage_totals)
-#         if pd.notna(value)  # in case some bins are empty
-#     ]
-
-#     ax.legend(
-#         wedges,
-#         legend_labels,
-#         title="Usage Range",
-#         loc="center left",
-#         bbox_to_anchor=(1, 0, 0.5, 1)
-#     )
-
-#     ax.set_title(f"{title_prefix} Water Usage Distribution by Usage Tiers")
-#     st.pyplot(fig)
-
-
-# def plot_revenue_distribution(df, rate_class, title_prefix, revenue_col="Actual_Total_Bill"):
-#     """
-#     Filter df for a given water rate class, assign usage ranges, 
-#     and plot pie chart with legend showing REVENUE distribution.
-    
-#     Parameters:
-#     - df: DataFrame
-#     - rate_class: str, water rate class (e.g., "IRES")
-#     - title_prefix: str, prefix for the chart title
-#     - revenue_col: str, column name for revenue ("Actual_Total_Bill" or "Modified_Total_Estimated_Bill")
-#     """
-#     subset = df[df['Wtr Rate'] == rate_class].copy()
-    
-#     # Choose usage binning depending on class
-#     if rate_class in ['ORES', 'OCOMM']:
-#         subset['UsageRange'] = subset['Billing Cons'].apply(usage_range_2)
-#         revenue_totals = (
-#             subset.groupby("UsageRange")[revenue_col]
-#             .sum()
-#             .reindex(["0–3k", "3–5k", "5k+"])
-#         )
-#     else:
-#         subset['UsageRange'] = subset['Billing Cons'].apply(usage_range)
-#         revenue_totals = (
-#             subset.groupby("UsageRange")[revenue_col]
-#             .sum()
-#             .reindex(["0–2k", "2–5k", "5k+"])
-#         )
-
-#     # Pie chart
-#     fig, ax = plt.subplots()
-#     wedges, _ = ax.pie(
-#         revenue_totals,
-#         labels=None,
-#         autopct=None,
-#         startangle=90
-#     )
-
-#     # Build legend with dollar amounts + percentages
-#     total = revenue_totals.sum()
-#     legend_labels = [
-#         f"{label}: ${value:,.0f} ({value/total:.1%})"
-#         for label, value in zip(revenue_totals.index, revenue_totals)
-#         if pd.notna(value)
-#     ]
-
-#     ax.legend(
-#         wedges,
-#         legend_labels,
-#         title="Usage Range",
-#         loc="center left",
-#         bbox_to_anchor=(1, 0, 0.5, 1)
-#     )
-
-#     ax.set_title(f"{title_prefix} Revenue Distribution by Usage Tiers")
-#     st.pyplot(fig)
 def plot_usage_distribution(df, rate_class, title_prefix, t1, t2):
     """
     Filter df for a given water rate class, assign usage ranges (using dynamic tiers),
@@ -623,19 +444,7 @@ def plot_revenue_distribution(df, rate_class, title_prefix, t1, t2, revenue_col=
 # Ensure Billing Cons numeric (thousands of gallons)
 file['Billing Cons'] = pd.to_numeric(file['Billing Cons'].astype(str).str.replace(',',''), errors='coerce')
 
-# # --- Usage Distribution by Class ---
-# st.subheader("Water Usage Distributions by Usage Tier (Actual Usage)")
-# plot_usage_distribution(file, "IRES",  "IRES")
-# plot_usage_distribution(file, "ICOMM", "ICOMM")
-# plot_usage_distribution(file, "ORES",  "ORES")
-# plot_usage_distribution(file, "OCOMM", "OCOMM")
 
-# # --- Usage Distribution by Class ---
-# st.subheader("Revenue Distributions by Usage Tier (Actual Revenue)")
-# plot_revenue_distribution(file, "IRES",  "IRES")
-# plot_revenue_distribution(file, "ICOMM", "ICOMM")
-# plot_revenue_distribution(file, "ORES",  "ORES")
-# plot_revenue_distribution(file, "OCOMM", "OCOMM")
 
 # Usage distributions (Actual Usage)
 st.subheader("Water Usage Distributions by Usage Tier (Actual Usage + Dynamic Usage Tiers)")
