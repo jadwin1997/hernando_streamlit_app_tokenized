@@ -311,7 +311,8 @@ ax2.pie(
     profit_by_rate, 
     labels=profit_by_rate.index, 
     autopct='%1.1f%%', 
-    startangle=90
+    startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
 )
 ax2.set_title("Profit Distribution by Water Rate Class")
 st.pyplot(fig2)
