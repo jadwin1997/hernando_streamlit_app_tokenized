@@ -299,7 +299,7 @@ profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR'
 
 
 # Define the desired order
-desired_order = ['IRES', 'ICOMM', 'ORES', 'OCOMM']
+desired_order = ['IRES', 'ICOMM', 'ORES', 'OCOMM', 'NONE']
 
 # Reindex the Series to enforce that order
 profit_by_rate = profit_by_rate.reindex(desired_order).fillna(0)
@@ -323,6 +323,14 @@ st.subheader("Revenue by Water Rate Class (Estimated Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Estimated_Total_Bill'].sum()
+
+
+# Define the desired order
+desired_order = ['IRES', 'ICOMM', 'ORES', 'OCOMM', 'NONE']
+
+# Reindex the Series to enforce that order
+profit_by_rate = profit_by_rate.reindex(desired_order).fillna(0)
+
 # Matplotlib Pie Chart
 fig2_5, ax2_5 = plt.subplots()
 ax2_5.pie(
@@ -340,7 +348,11 @@ st.subheader("Revenue by Water Rate Class (Modified Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Modified_Total_Estimated_Bill'].sum()
+# Define the desired order
+desired_order = ['IRES', 'ICOMM', 'ORES', 'OCOMM', 'NONE']
 
+# Reindex the Series to enforce that order
+profit_by_rate = profit_by_rate.reindex(desired_order).fillna(0)
 # Matplotlib Pie Chart
 fig3, ax3 = plt.subplots()
 ax3.pie(
