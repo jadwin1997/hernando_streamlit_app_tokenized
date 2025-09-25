@@ -441,7 +441,8 @@ def plot_revenue_distribution(df, rate_class, title_prefix, t1, t2, revenue_col=
         revenue_totals,
         labels=None,
         autopct=None,
-        startangle=90
+        startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
     )
 
     total = revenue_totals.sum()
@@ -527,7 +528,8 @@ wedges, _ = ax8.pie(
     revenue_by_class_usage,
     labels=None,
     autopct=None,
-    startangle=90
+    startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
 )
 
 # Legend with dollar values + percentages
@@ -565,7 +567,8 @@ wedges, _ = ax_usage.pie(
     usage_by_class_usage,
     labels=None,
     autopct=None,
-    startangle=90
+    startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
 )
 
 # Legend with values + percentages
@@ -681,7 +684,8 @@ wedges, _ = ax8.pie(
     revenue_by_class_usage,
     labels=None,
     autopct=None,
-    startangle=90
+    startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
 )
 
 # Legend with dollar values + percentages
