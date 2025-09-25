@@ -337,7 +337,8 @@ ax2_5.pie(
     profit_by_rate, 
     labels=profit_by_rate.index, 
     autopct='%1.1f%%', 
-    startangle=90
+    startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
 )
 ax2_5.set_title("Profit Distribution by Water Rate Class")
 st.pyplot(fig2_5)
@@ -359,7 +360,8 @@ ax3.pie(
     profit_by_rate, 
     labels=profit_by_rate.index, 
     autopct='%1.1f%%', 
-    startangle=90
+    startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
 )
 ax3.set_title("Profit Distribution by Water Rate Class")
 st.pyplot(fig3)
@@ -399,7 +401,8 @@ def plot_usage_distribution(df, rate_class, title_prefix, t1, t2):
         usage_totals,
         labels=None,
         autopct=None,
-        startangle=90
+        startangle=90,      # rotation of the first slice
+    counterclock=False  # make slices go clockwise
     )
 
     total = usage_totals.sum()
