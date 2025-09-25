@@ -296,6 +296,15 @@ st.subheader("Revenue by Water Rate Class (Actual Revenue)")
 file['Wtr Rate'] = file['Wtr Rate'].str.strip()
 # Group by water rate
 profit_by_rate = file[(file['Wtr Rate']!='METER') & (file['Wtr Rate']!='125 MTR') & (file['Wtr Rate']!='FIREHYDR')].groupby('Wtr Rate')['Actual_Total_Bill'].sum()
+
+
+# Define the desired order
+desired_order = ['IRES', 'ICOMM', 'ORES', 'OCOMM']
+
+# Reindex the Series to enforce that order
+profit_by_rate = profit_by_rate.reindex(desired_order).fillna(0)
+
+
 # Matplotlib Pie Chart
 fig2, ax2 = plt.subplots()
 ax2.pie(
