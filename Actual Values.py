@@ -295,7 +295,8 @@ def plot_usage_distribution(df, rate_class, title_prefix):
         usage_totals,
         labels=None,       # no labels on the slices
         autopct=None,      # no text inside
-        startangle=90
+        startangle=90,
+    counterclock=False  # make slices go clockwise
     )
 
     # Build legend with percentages
@@ -353,7 +354,8 @@ def plot_revenue_distribution(df, rate_class, title_prefix, revenue_col="Actual_
         revenue_totals,
         labels=None,
         autopct=None,
-        startangle=90
+        startangle=90,
+    counterclock=False  # make slices go clockwise
     )
 
     # Build legend with dollar amounts + percentages
@@ -431,7 +433,8 @@ wedges, _ = ax8.pie(
     revenue_by_class_usage,
     labels=None,
     autopct=None,
-    startangle=90
+    startangle=90,
+    counterclock=False  # make slices go clockwise
 )
 
 # Legend with dollar values + percentages
