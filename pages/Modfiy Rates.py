@@ -56,8 +56,10 @@ ORES_tier2 = st.sidebar.number_input("ORES Tier 2 max (k gallons):", value=5, st
 OCOMM_tier1 = st.sidebar.number_input("OCOMM Tier 1 max (k gallons):", value=3, step=1, key='ocomm_tier1_amount')
 OCOMM_tier2 = st.sidebar.number_input("OCOMM Tier 2 max (k gallons):", value=5, step=1, key='ocomm_tier2_amount')
 
-
-
+#Sidebar inputs for 
+st.sidebar.header("Sewer and DECRUA Adjustments")
+sewer_rate = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1, key='ires_tier1_amount')
+DCRUA_rate = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1, key='ires_tier1_amount')
 # --- GitHub private repo details ---
 GITHUB_OWNER = "jadwin1997"
 GITHUB_REPO  = "hernando_streamlit_app_data"
@@ -207,7 +209,7 @@ def make_modified_fn(
             # SEWER (same as before)
             dcrua = clean_amt(row['DCRUA Amt'])
             if swr_rate in ["IRES", "ICOMM"]:
-                sewer_charge = max(water_charge / 2, 6.25) + dcrua
+                sewer_charge = max(water_charge / 2, 6.25) + dcrua#add dynamic dcrua, min sewer charge, and sewer charge
             elif swr_rate in ["ORES", "OCOMM"]:
                 sewer_charge = max(water_charge / 2, 8.00) + dcrua
             else:
