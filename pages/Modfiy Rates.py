@@ -58,8 +58,10 @@ OCOMM_tier2 = st.sidebar.number_input("OCOMM Tier 2 max (k gallons):", value=5, 
 
 #Sidebar inputs for 
 st.sidebar.header("Sewer and DECRUA Adjustments")
-sewer_rate = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1, key='ires_tier1_amount')
-DCRUA_rate = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1, key='ires_tier1_amount')
+sewer_rate = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1, key='sewer_rate')
+DCRUA_rate = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1, key='DCRUA_rate')
+
+
 # --- GitHub private repo details ---
 GITHUB_OWNER = "jadwin1997"
 GITHUB_REPO  = "hernando_streamlit_app_data"
