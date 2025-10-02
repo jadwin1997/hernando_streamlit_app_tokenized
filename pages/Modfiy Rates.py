@@ -254,7 +254,8 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
         ocomm_t1_max=OCOMM_tier1,
         ocomm_t2_max=OCOMM_tier2,
         ocomm_t2_rate=ocomm_2_5,
-        ocomm_t3_rate=ocomm_5
+        ocomm_t3_rate=ocomm_5,
+        
     )
 
     # Apply the function row-wise to your DataFrame
