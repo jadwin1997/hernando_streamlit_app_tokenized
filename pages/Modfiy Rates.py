@@ -63,6 +63,7 @@ check_box_sewer_multiplier_enable = st.sidebar.checkbox("Enable Sewer Rate Multi
 sewer_multiplier_rate = st.sidebar.number_input("Multiple of Water Charge:", value=2, step=1, key='sewer_multiplier_rate', label_visibility="visible")
 DCRUA_rate = st.sidebar.number_input("IRES Tier 1 max (k gallons):", value=2, step=1, key='DCRUA_rate')
 
+#sewer_rate, check_box_sewer_multiplier_enable, sewer_multiplier_rate, DCRUA_rate
 
 # --- GitHub private repo details ---
 GITHUB_OWNER = "jadwin1997"
@@ -149,7 +150,7 @@ def make_modified_fn(
     ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
     icomm_t1_max, icomm_t2_max, icomm_t2_rate, icomm_t3_rate,
     ores_t1_max, ores_t2_max, ores_t2_rate, ores_t3_rate,
-    ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate
+    ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate, base_sewer_rate, sewer_multiplier_enable, sewer_multiplier, DCRUA_base_rate
 ):
     def _fn(row):
         gallons = int(str(row["Billing Cons"]).replace(',', ''))
@@ -213,9 +214,9 @@ def make_modified_fn(
             # SEWER (same as before)
             dcrua = clean_amt(row['DCRUA Amt'])
             if swr_rate in ["IRES", "ICOMM"]:
-                sewer_charge = max(water_charge / 2, 6.25) + dcrua#add dynamic dcrua, min sewer charge, and sewer charge
+                sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + dcrua#add dynamic dcrua, min sewer charge, and sewer charge
             elif swr_rate in ["ORES", "OCOMM"]:
-                sewer_charge = max(water_charge / 2, 8.00) + dcrua
+                sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + dcrua
             else:
                 return check_actual(row)
 
@@ -225,7 +226,7 @@ def make_modified_fn(
     return _fn
 
 @st.cache_data
-def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5, ires_tier1, ires_tier2, ICOMM_tier1, ICOMM_tier2, ORES_tier1, ORES_tier2, OCOMM_tier1, OCOMM_tier2):
+def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5, ires_tier1, ires_tier2, ICOMM_tier1, ICOMM_tier2, ORES_tier1, ORES_tier2, OCOMM_tier1, OCOMM_tier2, sewer_rate, check_box_sewer_multiplier_enable, sewer_multiplier_rate, DCRUA_rate):
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
@@ -255,6 +256,10 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
         ocomm_t2_max=OCOMM_tier2,
         ocomm_t2_rate=ocomm_2_5,
         ocomm_t3_rate=ocomm_5,
+        base_sewer_rate = sewer_rate, 
+        sewer_multiplier_enable = check_box_sewer_multiplier_enable, 
+        sewer_multiplier = sewer_multiplier_rate, 
+        DCRUA_base_rate = DCRUA_rate
         
     )
 
@@ -264,7 +269,7 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
     df['Relative_Error_%'] = (df['Actual_Estimated_Diff'] / df['Actual_Total_Bill']).replace([np.inf, -np.inf], 0).fillna(0)
     return df
 
-file = preprocess(raw,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5, ires_tier1, ires_tier2, ICOMM_tier1, ICOMM_tier2, ORES_tier1, ORES_tier2, OCOMM_tier1, OCOMM_tier2)
+file = preprocess(raw,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5, ires_tier1, ires_tier2, ICOMM_tier1, ICOMM_tier2, ORES_tier1, ORES_tier2, OCOMM_tier1, OCOMM_tier2, sewer_rate, check_box_sewer_multiplier_enable, sewer_multiplier_rate, DCRUA_rate)
 
 # --- Display ---
 st.subheader("Sample of Billing Data")
