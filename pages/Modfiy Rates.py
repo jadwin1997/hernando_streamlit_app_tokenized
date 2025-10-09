@@ -58,7 +58,7 @@ OCOMM_tier2 = st.sidebar.number_input("OCOMM Tier 2 max (k gallons):", value=5, 
 
 #Sidebar inputs for 
 st.sidebar.header("Sewer and DECRUA Adjustments")
-sewer_rate = st.sidebar.number_input("Rate per 1000 gallons:", value=2, step=1, key='sewer_rate')
+sewer_rate = st.sidebar.number_input("Rate per 1000 gallons ($):", value=5, step=0.01, key='sewer_rate')
 check_box_sewer_multiplier_enable = st.sidebar.checkbox("Enable Sewer Rate Multiplier", value=False, key='sewer_rate_multiplier_enable')
 sewer_multiplier_rate = st.sidebar.number_input("Multiple of Water Charge:", value=0.5, step=0.1, key='sewer_multiplier_rate', label_visibility="visible")
 DCRUA_rate = st.sidebar.number_input("DCRUA Rate (unit):", value=0.5, step=0.1, key='DCRUA_rate')
@@ -214,6 +214,7 @@ def make_modified_fn(
             # SEWER (same as before)
             dcrua = clean_amt(row['DCRUA Amt'])
             if swr_rate in ["IRES", "ICOMM"]:
+                print(sewer_multiplier_enable)
                 sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + dcrua#add dynamic dcrua, min sewer charge, and sewer charge
             elif swr_rate in ["ORES", "OCOMM"]:
                 sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + dcrua
