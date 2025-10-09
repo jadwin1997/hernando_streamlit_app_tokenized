@@ -214,10 +214,15 @@ def make_modified_fn(
             # SEWER (same as before)
             dcrua = clean_amt(row['DCRUA Amt'])
             if swr_rate in ["IRES", "ICOMM"]:
-                print(sewer_multiplier_enable)
-                sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + dcrua#add dynamic dcrua, min sewer charge, and sewer charge
+                if(not sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + dcrua#add dynamic dcrua, min sewer charge, and sewer charge
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 6.25) + dcrua
             elif swr_rate in ["ORES", "OCOMM"]:
-                sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + dcrua
+                if(not sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + dcrua
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 8.00) + dcrua
             else:
                 return check_actual(row)
 
