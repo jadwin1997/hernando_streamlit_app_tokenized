@@ -60,8 +60,8 @@ OCOMM_tier2 = st.sidebar.number_input("OCOMM Tier 2 max (k gallons):", value=5, 
 st.sidebar.header("Sewer and DECRUA Adjustments")
 sewer_rate = st.sidebar.number_input("Rate per 1000 gallons:", value=2, step=1, key='sewer_rate')
 check_box_sewer_multiplier_enable = st.sidebar.checkbox("Enable Sewer Rate Multiplier", value=False, key='sewer_rate_multiplier_enable')
-sewer_multiplier_rate = st.sidebar.number_input("Multiple of Water Charge:", value=2, step=1, key='sewer_multiplier_rate', label_visibility="visible")
-DCRUA_rate = st.sidebar.number_input("DCRUA Rate (unit):", value=2, step=1, key='DCRUA_rate')
+sewer_multiplier_rate = st.sidebar.number_input("Multiple of Water Charge:", value=0.5, step=0.1, key='sewer_multiplier_rate', label_visibility="visible")
+DCRUA_rate = st.sidebar.number_input("DCRUA Rate (unit):", value=0.5, step=0.1, key='DCRUA_rate')
 
 #sewer_rate, check_box_sewer_multiplier_enable, sewer_multiplier_rate, DCRUA_rate
 
