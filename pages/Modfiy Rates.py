@@ -219,7 +219,7 @@ def make_modified_fn(
                 else:
                     sewer_charge = max(gallons * base_sewer_rate, 6.25) + dcrua
             elif swr_rate in ["ORES", "OCOMM"]:
-                if(not sewer_multiplier_enable):
+                if(sewer_multiplier_enable):
                     sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + dcrua
                 else:
                     sewer_charge = max(gallons * base_sewer_rate, 8.00) + dcrua
