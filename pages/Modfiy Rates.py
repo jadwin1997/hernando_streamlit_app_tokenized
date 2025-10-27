@@ -113,6 +113,7 @@ def clean_amt(x):
     return float(str(x).replace(',', '').replace('$', ''))
 
 def check_actual(row):
+    global summed_water_charge_actual, summed_sewer_actual, summed_dcrua_actual
     summed_water_charge_actual += clean_amt(row['Wtr Amt'])
     summed_sewer_actual += clean_amt(row['Swr Amt'])
     summed_dcrua_actual += clean_amt(row['DCRUA Amt']) 
@@ -309,7 +310,7 @@ st.pyplot(fig)
 # --- Revenue summary ---
 st.subheader("Revenue Summary")
 st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
-#st.write(f"Actual Total Water Charge: ${summed_water_charge_actual:,.2f}")
+st.write(f"Actual Total Water Charge: ${summed_water_charge_actual:,.2f}")
 st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
 st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
 diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
