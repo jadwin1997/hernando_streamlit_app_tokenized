@@ -155,7 +155,7 @@ def check_estimated(row):
             sewer_charge = max(water_charge / 2, 8.00) + dcrua
         else:
             return check_actual(row)
-        return round(water_charge + sewer_charge, 2)
+        return water_charge + sewer_charge
     return 0
 
 
@@ -311,7 +311,7 @@ def make_modified_fn(
             else:
                 return check_actual(row)
 
-            return round(water_charge + sewer_charge, 2)
+            return water_charge + sewer_charge
 
         return 0
     return _fn
@@ -554,7 +554,7 @@ def get_modified_dcrua(
             else:
                 return check_actual_dcrua(row)
 
-            return round(dcrua_charge, 2)
+            return dcrua_charge
 
         return 0
     return _fn
