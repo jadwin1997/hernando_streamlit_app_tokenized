@@ -220,13 +220,14 @@ def get_sewer_rate_estimated(row):
     return 0
 
 def get_dcrua_rate_estimated(row):
-    gallons = int(str(row["Billing Cons"]).replace(',',''))
-    wtr_rate = str(row["Wtr Rate"]).upper().strip()
-    swr_rate = str(row["Swr Rate"]).upper().strip()
-    water_charge = 0
-    if 'ACTIVE' in str(row['Status'])[:6]:
-        return round(check_actual_dcrua(row), 2)
-    return 0
+    # gallons = int(str(row["Billing Cons"]).replace(',',''))
+    # wtr_rate = str(row["Wtr Rate"]).upper().strip()
+    # swr_rate = str(row["Swr Rate"]).upper().strip()
+    # water_charge = 0
+    # if 'ACTIVE' in str(row['Status'])[:6]:
+    #     return round(check_actual_dcrua(row), 2)
+    # return 0
+    return(clean_amt(row['DCRUA Amt']))
 
 
 
