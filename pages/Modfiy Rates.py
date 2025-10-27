@@ -450,8 +450,8 @@ def get_modified_sewer_charge(
                         + (gallons - ocomm_t2_max) * ocomm_t3_rate
                     )
 
-            else:
-                return check_actual_swr(row)
+            #else:
+                #return check_actual_swr(row)
 
             # SEWER (same as before)
             dcrua = clean_amt(row['DCRUA Amt'])
