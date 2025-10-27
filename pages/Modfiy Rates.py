@@ -392,6 +392,8 @@ st.write(f"Actual Total DCRUA Charges: ${file['DCRUA Amt'].apply(clean_amt).sum(
 st.divider()
 st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
 st.write(f"Estimated Total Water Charges: ${file.apply(get_water_rate_estimated, axis=1).sum():,.2f}")
+st.write(f"Estimated Total Sewer Charges: ${file.apply(get_sewer_rate_estimated, axis=1).sum():,.2f}")
+st.write(f"Estimated Total DCRUA Charges: ${file.apply(get_dcrua_rate_estimated, axis=1).sum():,.2f}")
 st.divider()
 st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
 st.divider()
