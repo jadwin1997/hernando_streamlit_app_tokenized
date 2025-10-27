@@ -380,24 +380,8 @@ def get_modified_water_charge(
                     )
 
             else:
-                return check_actual(row)
-
-            # SEWER (same as before)
-            dcrua = clean_amt(row['DCRUA Amt'])
-            if swr_rate in ["IRES", "ICOMM"]:
-                if(sewer_multiplier_enable):
-                    sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + gallons * DCRUA_rate#add dynamic dcrua, min sewer charge, and sewer charge
-                else:
-                    sewer_charge = max(gallons * base_sewer_rate, 6.25) + gallons * DCRUA_rate
-            elif swr_rate in ["ORES", "OCOMM"]:
-                if(sewer_multiplier_enable):
-                    sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + gallons * DCRUA_rate
-                else:
-                    sewer_charge = max(gallons * base_sewer_rate, 8.00) + gallons * DCRUA_rate
-            else:
-                return check_actual(row)
-
-            return round(water_charge + sewer_charge, 2)
+                return check_actual_wtr(row)
+            return round(water_charge, 2)
 
         return 0
     return _fn
@@ -655,6 +639,38 @@ st.write(f"Estimated Total Sewer Charges: ${file.apply(get_sewer_rate_estimated,
 st.write(f"Estimated Total DCRUA Charges: ${file.apply(get_dcrua_rate_estimated, axis=1).sum():,.2f}")
 st.divider()
 st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
+modified_wtr_rate = get_modified_water_charge(
+        ires_base=ires_base,
+        icomm_base=icomm_base,
+        ores_base=ores_base,
+        ocomm_base=ocomm_base,
+        
+        ires_t1_max=ires_tier1,
+        ires_t2_max=ires_tier2,
+        ires_t2_rate=ires_2_5,
+        ires_t3_rate=ires_5,
+        
+        icomm_t1_max=ICOMM_tier1,
+        icomm_t2_max=ICOMM_tier2,
+        icomm_t2_rate=icomm_2_5,
+        icomm_t3_rate=icomm_5,
+        
+        ores_t1_max=ORES_tier1,
+        ores_t2_max=ORES_tier2,
+        ores_t2_rate=ores_2_5,
+        ores_t3_rate=ores_5,
+        
+        ocomm_t1_max=OCOMM_tier1,
+        ocomm_t2_max=OCOMM_tier2,
+        ocomm_t2_rate=ocomm_2_5,
+        ocomm_t3_rate=ocomm_5,
+        base_sewer_rate = sewer_rate, 
+        sewer_multiplier_enable = check_box_sewer_multiplier_enable, 
+        sewer_multiplier = sewer_multiplier_rate, 
+        DCRUA_base_rate = DCRUA_rate
+        
+    )
+st.write(f"Modified Total Water Charges: ${file.apply(modified_wtr_rate, axis=1).sum():,.2f}")
 st.divider()
 diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
 diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum()
