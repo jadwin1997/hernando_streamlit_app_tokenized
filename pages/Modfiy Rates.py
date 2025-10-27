@@ -70,7 +70,12 @@ GITHUB_OWNER = "jadwin1997"
 GITHUB_REPO  = "hernando_streamlit_app_data"
 CSV_PATH     = "Hernando-NewInfo.csv"  # path inside the repo
 GITHUB_TOKEN = st.secrets["github"]["token"]
-
+summed_dcrua_actual = 0
+summed_sewer_actual = 0
+summed_water_charge_actual = 0
+summed_dcrua_modified = 0
+summed_sewer_modified = 0
+summed_water_charge_modified = 0
 # --- Fetch CSV from GitHub ---
 @st.cache_data
 def load_csv_from_github(owner, repo, path, token, branch="main"):
@@ -108,6 +113,9 @@ def clean_amt(x):
     return float(str(x).replace(',', '').replace('$', ''))
 
 def check_actual(row):
+    summed_water_charge_actual += clean_amt(row['Wtr Amt'])
+    summed_sewer_actual += clean_amt(row['Swr Amt'])
+    summed_dcrua_actual += clean_amt(row['DCRUA Amt']) 
     return clean_amt(row['Wtr Amt']) + clean_amt(row['Swr Amt']) + clean_amt(row['DCRUA Amt'])
 
 def check_estimated(row):
@@ -301,6 +309,7 @@ st.pyplot(fig)
 # --- Revenue summary ---
 st.subheader("Revenue Summary")
 st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
+st.write(f"Actual Total Water Charge: ${summed_water_charge_actual:,.2f}")
 st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
 st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
 diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
