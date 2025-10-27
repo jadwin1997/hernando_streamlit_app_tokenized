@@ -450,21 +450,21 @@ def get_modified_sewer_charge(
                         + (gallons - ocomm_t2_max) * ocomm_t3_rate
                     )
 
-            #else:
-                #return check_actual_swr(row)
+            else:
+                return check_actual_swr(row)
 
             # SEWER (same as before)
             dcrua = clean_amt(row['DCRUA Amt'])
             if swr_rate in ["IRES", "ICOMM"]:
                 if(sewer_multiplier_enable):
-                    sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + gallons * DCRUA_rate#add dynamic dcrua, min sewer charge, and sewer charge
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) #add dynamic dcrua, min sewer charge, and sewer charge
                 else:
-                    sewer_charge = max(gallons * base_sewer_rate, 6.25) + gallons * DCRUA_rate
+                    sewer_charge = max(gallons * base_sewer_rate, 6.25) 
             elif swr_rate in ["ORES", "OCOMM"]:
                 if(sewer_multiplier_enable):
-                    sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + gallons * DCRUA_rate
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) 
                 else:
-                    sewer_charge = max(gallons * base_sewer_rate, 8.00) + gallons * DCRUA_rate
+                    sewer_charge = max(gallons * base_sewer_rate, 8.00)
             else:
                 return check_actual_swr(row)
 
