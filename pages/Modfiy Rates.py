@@ -207,7 +207,7 @@ def get_sewer_rate_estimated(row):
             else:
                 water_charge = 16.00 + (2 * 3.50) + (gallons - 5) * 3.95
         else:
-            return check_actual(row)
+            return check_actual_swr(row)
         # SEWER
         dcrua = clean_amt(row['DCRUA Amt'])
         if swr_rate in ["IRES", "ICOMM"]:
@@ -215,7 +215,7 @@ def get_sewer_rate_estimated(row):
         elif swr_rate in ["ORES", "OCOMM"]:
             sewer_charge = max(water_charge / 2, 8.00)
         else:
-            return check_actual(row)
+            return check_actual_swr(row)
         return round(sewer_charge, 2)
     return 0
 
