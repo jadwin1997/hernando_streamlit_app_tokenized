@@ -241,7 +241,7 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
     global summed_water_charge_actual, summed_sewer_actual, summed_dcrua_actual
-    summed_water_charge_actual = df['Wtr Amt'].apply(clean_amt).sum()
+    summed_water_charge_actual = df['Wtr Amt'].apply(clean_amt,axis = 1).sum()
     summed_sewer_actual = df['Swr Amt'].apply(clean_amt).sum()
     summed_dcrua_actual = df['DCRUA Amt'].apply(clean_amt).sum()
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
