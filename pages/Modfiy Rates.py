@@ -114,7 +114,7 @@ def clean_amt(x):
 
 def check_actual(row):
     global summed_water_charge_actual, summed_sewer_actual, summed_dcrua_actual
-    summed_water_charge_actual += clean_amt(row['Wtr Amt'])
+    summed_water_charge_actual += 1#clean_amt(row['Wtr Amt'])
     summed_sewer_actual += clean_amt(row['Swr Amt'])
     summed_dcrua_actual += clean_amt(row['DCRUA Amt']) 
     return clean_amt(row['Wtr Amt']) + clean_amt(row['Swr Amt']) + clean_amt(row['DCRUA Amt'])
