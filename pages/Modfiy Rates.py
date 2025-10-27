@@ -181,7 +181,7 @@ def get_water_rate_estimated(row):
                 water_charge = 16.00 + (2 * 3.50) + (gallons - 5) * 3.95
         else:
             return check_actual_wtr(row)
-        return round(water_charge, 2)
+        return water_charge
     return 0
 
 def get_sewer_rate_estimated(row):
@@ -215,7 +215,7 @@ def get_sewer_rate_estimated(row):
             sewer_charge = max(water_charge / 2, 8.00)
         else:
             return check_actual_swr(row)
-        return round(sewer_charge, 2)
+        return sewer_charge
     return 0
 
 def get_dcrua_rate_estimated(row):
@@ -381,7 +381,7 @@ def get_modified_water_charge(
 
             else:
                 return check_actual_wtr(row)
-            return round(water_charge, 2)
+            return water_charge
 
         return 0
     return _fn
@@ -468,7 +468,7 @@ def get_modified_sewer_charge(
             else:
                 return check_actual_swr(row)
 
-            return round(sewer_charge, 2)
+            return sewer_charge
 
         return 0
     return _fn
