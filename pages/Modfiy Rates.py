@@ -162,7 +162,6 @@ def check_estimated(row):
 def get_water_rate_estimated(row):
     gallons = int(str(row["Billing Cons"]).replace(',',''))
     wtr_rate = str(row["Wtr Rate"]).upper().strip()
-    swr_rate = str(row["Swr Rate"]).upper().strip()
     water_charge = 0
     if 'ACTIVE' in str(row['Status'])[:6]:
         # WATER
@@ -232,6 +231,265 @@ def get_dcrua_rate_estimated(row):
 
 
 def make_modified_fn(
+    ires_base, icomm_base, ores_base, ocomm_base,
+    ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
+    icomm_t1_max, icomm_t2_max, icomm_t2_rate, icomm_t3_rate,
+    ores_t1_max, ores_t2_max, ores_t2_rate, ores_t3_rate,
+    ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate, base_sewer_rate, sewer_multiplier_enable, sewer_multiplier, DCRUA_base_rate
+):
+    def _fn(row):
+        gallons = int(str(row["Billing Cons"]).replace(',', ''))
+        wtr_rate = str(row["Wtr Rate"]).upper().strip()
+        swr_rate = str(row["Swr Rate"]).upper().strip()
+        water_charge = 0
+
+        if 'ACTIVE' in str(row['Status'])[:6]:
+            # WATER (with user-modifiable rates)
+            if wtr_rate == "IRES":
+                if gallons <= ires_t1_max:
+                    water_charge = ires_base
+                elif gallons <= ires_t2_max:
+                    water_charge = ires_base + (gallons - ires_t1_max) * ires_t2_rate
+                else:
+                    water_charge = (
+                        ires_base
+                        + (ires_t2_max - ires_t1_max) * ires_t2_rate
+                        + (gallons - ires_t2_max) * ires_t3_rate
+                    )
+
+            elif wtr_rate == "ICOMM":
+                if gallons <= icomm_t1_max:
+                    water_charge = icomm_base
+                elif gallons <= icomm_t2_max:
+                    water_charge = icomm_base + (gallons - icomm_t1_max) * icomm_t2_rate
+                else:
+                    water_charge = (
+                        icomm_base
+                        + (icomm_t2_max - icomm_t1_max) * icomm_t2_rate
+                        + (gallons - icomm_t2_max) * icomm_t3_rate
+                    )
+
+            elif wtr_rate == "ORES":
+                if gallons <= ores_t1_max:
+                    water_charge = ores_base
+                elif gallons <= ores_t2_max:
+                    water_charge = ores_base + (gallons - ores_t1_max) * ores_t2_rate
+                else:
+                    water_charge = (
+                        ores_base
+                        + (ores_t2_max - ores_t1_max) * ores_t2_rate
+                        + (gallons - ores_t2_max) * ores_t3_rate
+                    )
+
+            elif wtr_rate == "OCOMM":
+                if gallons <= ocomm_t1_max:
+                    water_charge = ocomm_base
+                elif gallons <= ocomm_t2_max:
+                    water_charge = ocomm_base + (gallons - ocomm_t1_max) * ocomm_t2_rate
+                else:
+                    water_charge = (
+                        ocomm_base
+                        + (ocomm_t2_max - ocomm_t1_max) * ocomm_t2_rate
+                        + (gallons - ocomm_t2_max) * ocomm_t3_rate
+                    )
+
+            else:
+                return check_actual(row)
+
+            # SEWER (same as before)
+            dcrua = clean_amt(row['DCRUA Amt'])
+            if swr_rate in ["IRES", "ICOMM"]:
+                if(sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + gallons * DCRUA_rate#add dynamic dcrua, min sewer charge, and sewer charge
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 6.25) + gallons * DCRUA_rate
+            elif swr_rate in ["ORES", "OCOMM"]:
+                if(sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + gallons * DCRUA_rate
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 8.00) + gallons * DCRUA_rate
+            else:
+                return check_actual(row)
+
+            return round(water_charge + sewer_charge, 2)
+
+        return 0
+    return _fn
+
+def get_modified_water_charge(
+    ires_base, icomm_base, ores_base, ocomm_base,
+    ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
+    icomm_t1_max, icomm_t2_max, icomm_t2_rate, icomm_t3_rate,
+    ores_t1_max, ores_t2_max, ores_t2_rate, ores_t3_rate,
+    ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate, base_sewer_rate, sewer_multiplier_enable, sewer_multiplier, DCRUA_base_rate
+):
+    def _fn(row):
+        gallons = int(str(row["Billing Cons"]).replace(',', ''))
+        wtr_rate = str(row["Wtr Rate"]).upper().strip()
+        swr_rate = str(row["Swr Rate"]).upper().strip()
+        water_charge = 0
+
+        if 'ACTIVE' in str(row['Status'])[:6]:
+            # WATER (with user-modifiable rates)
+            if wtr_rate == "IRES":
+                if gallons <= ires_t1_max:
+                    water_charge = ires_base
+                elif gallons <= ires_t2_max:
+                    water_charge = ires_base + (gallons - ires_t1_max) * ires_t2_rate
+                else:
+                    water_charge = (
+                        ires_base
+                        + (ires_t2_max - ires_t1_max) * ires_t2_rate
+                        + (gallons - ires_t2_max) * ires_t3_rate
+                    )
+
+            elif wtr_rate == "ICOMM":
+                if gallons <= icomm_t1_max:
+                    water_charge = icomm_base
+                elif gallons <= icomm_t2_max:
+                    water_charge = icomm_base + (gallons - icomm_t1_max) * icomm_t2_rate
+                else:
+                    water_charge = (
+                        icomm_base
+                        + (icomm_t2_max - icomm_t1_max) * icomm_t2_rate
+                        + (gallons - icomm_t2_max) * icomm_t3_rate
+                    )
+
+            elif wtr_rate == "ORES":
+                if gallons <= ores_t1_max:
+                    water_charge = ores_base
+                elif gallons <= ores_t2_max:
+                    water_charge = ores_base + (gallons - ores_t1_max) * ores_t2_rate
+                else:
+                    water_charge = (
+                        ores_base
+                        + (ores_t2_max - ores_t1_max) * ores_t2_rate
+                        + (gallons - ores_t2_max) * ores_t3_rate
+                    )
+
+            elif wtr_rate == "OCOMM":
+                if gallons <= ocomm_t1_max:
+                    water_charge = ocomm_base
+                elif gallons <= ocomm_t2_max:
+                    water_charge = ocomm_base + (gallons - ocomm_t1_max) * ocomm_t2_rate
+                else:
+                    water_charge = (
+                        ocomm_base
+                        + (ocomm_t2_max - ocomm_t1_max) * ocomm_t2_rate
+                        + (gallons - ocomm_t2_max) * ocomm_t3_rate
+                    )
+
+            else:
+                return check_actual(row)
+
+            # SEWER (same as before)
+            dcrua = clean_amt(row['DCRUA Amt'])
+            if swr_rate in ["IRES", "ICOMM"]:
+                if(sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + gallons * DCRUA_rate#add dynamic dcrua, min sewer charge, and sewer charge
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 6.25) + gallons * DCRUA_rate
+            elif swr_rate in ["ORES", "OCOMM"]:
+                if(sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + gallons * DCRUA_rate
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 8.00) + gallons * DCRUA_rate
+            else:
+                return check_actual(row)
+
+            return round(water_charge + sewer_charge, 2)
+
+        return 0
+    return _fn
+
+
+def get_modified_sewer_charge(
+    ires_base, icomm_base, ores_base, ocomm_base,
+    ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
+    icomm_t1_max, icomm_t2_max, icomm_t2_rate, icomm_t3_rate,
+    ores_t1_max, ores_t2_max, ores_t2_rate, ores_t3_rate,
+    ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate, base_sewer_rate, sewer_multiplier_enable, sewer_multiplier, DCRUA_base_rate
+):
+    def _fn(row):
+        gallons = int(str(row["Billing Cons"]).replace(',', ''))
+        wtr_rate = str(row["Wtr Rate"]).upper().strip()
+        swr_rate = str(row["Swr Rate"]).upper().strip()
+        water_charge = 0
+
+        if 'ACTIVE' in str(row['Status'])[:6]:
+            # WATER (with user-modifiable rates)
+            if wtr_rate == "IRES":
+                if gallons <= ires_t1_max:
+                    water_charge = ires_base
+                elif gallons <= ires_t2_max:
+                    water_charge = ires_base + (gallons - ires_t1_max) * ires_t2_rate
+                else:
+                    water_charge = (
+                        ires_base
+                        + (ires_t2_max - ires_t1_max) * ires_t2_rate
+                        + (gallons - ires_t2_max) * ires_t3_rate
+                    )
+
+            elif wtr_rate == "ICOMM":
+                if gallons <= icomm_t1_max:
+                    water_charge = icomm_base
+                elif gallons <= icomm_t2_max:
+                    water_charge = icomm_base + (gallons - icomm_t1_max) * icomm_t2_rate
+                else:
+                    water_charge = (
+                        icomm_base
+                        + (icomm_t2_max - icomm_t1_max) * icomm_t2_rate
+                        + (gallons - icomm_t2_max) * icomm_t3_rate
+                    )
+
+            elif wtr_rate == "ORES":
+                if gallons <= ores_t1_max:
+                    water_charge = ores_base
+                elif gallons <= ores_t2_max:
+                    water_charge = ores_base + (gallons - ores_t1_max) * ores_t2_rate
+                else:
+                    water_charge = (
+                        ores_base
+                        + (ores_t2_max - ores_t1_max) * ores_t2_rate
+                        + (gallons - ores_t2_max) * ores_t3_rate
+                    )
+
+            elif wtr_rate == "OCOMM":
+                if gallons <= ocomm_t1_max:
+                    water_charge = ocomm_base
+                elif gallons <= ocomm_t2_max:
+                    water_charge = ocomm_base + (gallons - ocomm_t1_max) * ocomm_t2_rate
+                else:
+                    water_charge = (
+                        ocomm_base
+                        + (ocomm_t2_max - ocomm_t1_max) * ocomm_t2_rate
+                        + (gallons - ocomm_t2_max) * ocomm_t3_rate
+                    )
+
+            else:
+                return check_actual(row)
+
+            # SEWER (same as before)
+            dcrua = clean_amt(row['DCRUA Amt'])
+            if swr_rate in ["IRES", "ICOMM"]:
+                if(sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 6.25) + gallons * DCRUA_rate#add dynamic dcrua, min sewer charge, and sewer charge
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 6.25) + gallons * DCRUA_rate
+            elif swr_rate in ["ORES", "OCOMM"]:
+                if(sewer_multiplier_enable):
+                    sewer_charge = max(water_charge * sewer_multiplier_rate, 8.00) + gallons * DCRUA_rate
+                else:
+                    sewer_charge = max(gallons * base_sewer_rate, 8.00) + gallons * DCRUA_rate
+            else:
+                return check_actual(row)
+
+            return round(water_charge + sewer_charge, 2)
+
+        return 0
+    return _fn
+
+def get_modified_dcrua(
     ires_base, icomm_base, ores_base, ocomm_base,
     ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
     icomm_t1_max, icomm_t2_max, icomm_t2_rate, icomm_t3_rate,
