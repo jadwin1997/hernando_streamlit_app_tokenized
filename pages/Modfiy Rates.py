@@ -115,6 +115,15 @@ def clean_amt(x):
 def check_actual(row):
     return clean_amt(row['Wtr Amt']) + clean_amt(row['Swr Amt']) + clean_amt(row['DCRUA Amt'])
 
+def check_actual_wtr(row):
+    return clean_amt(row['Wtr Amt'])
+
+def check_actual_swr(row):
+    return clean_amt(row['Swr Amt'])
+
+def check_actual_dcrua(row):
+    return clean_amt(row['DCRUA Amt'])
+
 def check_estimated(row):
     gallons = int(str(row["Billing Cons"]).replace(',',''))
     wtr_rate = str(row["Wtr Rate"]).upper().strip()
@@ -148,6 +157,77 @@ def check_estimated(row):
             return check_actual(row)
         return round(water_charge + sewer_charge, 2)
     return 0
+
+
+def get_water_rate_estimated(row):
+    gallons = int(str(row["Billing Cons"]).replace(',',''))
+    wtr_rate = str(row["Wtr Rate"]).upper().strip()
+    swr_rate = str(row["Swr Rate"]).upper().strip()
+    water_charge = 0
+    if 'ACTIVE' in str(row['Status'])[:6]:
+        # WATER
+        if wtr_rate in ["IRES", "ICOMM"]:
+            if gallons <= 2:
+                water_charge = 12.50
+            elif gallons <= 5:
+                water_charge = 12.50 + (gallons - 2) * 3.15
+            else:
+                water_charge = 12.50 + (3 * 3.15) + (gallons - 5) * 3.50
+        elif wtr_rate in ["ORES", "OCOMM"]:
+            if gallons <= 3:
+                water_charge = 16.00
+            elif gallons <= 5:
+                water_charge = 16.00 + (gallons - 3) * 3.50
+            else:
+                water_charge = 16.00 + (2 * 3.50) + (gallons - 5) * 3.95
+        else:
+            return check_actual_wtr(row)
+        return round(water_charge, 2)
+    return 0
+
+def get_sewer_rate_estimated(row):
+    gallons = int(str(row["Billing Cons"]).replace(',',''))
+    wtr_rate = str(row["Wtr Rate"]).upper().strip()
+    swr_rate = str(row["Swr Rate"]).upper().strip()
+    water_charge = 0
+    if 'ACTIVE' in str(row['Status'])[:6]:
+        # WATER
+        if wtr_rate in ["IRES", "ICOMM"]:
+            if gallons <= 2:
+                water_charge = 12.50
+            elif gallons <= 5:
+                water_charge = 12.50 + (gallons - 2) * 3.15
+            else:
+                water_charge = 12.50 + (3 * 3.15) + (gallons - 5) * 3.50
+        elif wtr_rate in ["ORES", "OCOMM"]:
+            if gallons <= 3:
+                water_charge = 16.00
+            elif gallons <= 5:
+                water_charge = 16.00 + (gallons - 3) * 3.50
+            else:
+                water_charge = 16.00 + (2 * 3.50) + (gallons - 5) * 3.95
+        else:
+            return check_actual(row)
+        # SEWER
+        dcrua = clean_amt(row['DCRUA Amt'])
+        if swr_rate in ["IRES", "ICOMM"]:
+            sewer_charge = max(water_charge / 2, 6.25)
+        elif swr_rate in ["ORES", "OCOMM"]:
+            sewer_charge = max(water_charge / 2, 8.00)
+        else:
+            return check_actual(row)
+        return round(sewer_charge, 2)
+    return 0
+
+def get_dcrua_rate_estimated(row):
+    gallons = int(str(row["Billing Cons"]).replace(',',''))
+    wtr_rate = str(row["Wtr Rate"]).upper().strip()
+    swr_rate = str(row["Swr Rate"]).upper().strip()
+    water_charge = 0
+    if 'ACTIVE' in str(row['Status'])[:6]:
+        return round(check_actual_dcrua(row), 2)
+    return 0
+
 
 
 def make_modified_fn(
@@ -311,6 +391,7 @@ st.write(f"Actual Total Sewer Charges: ${file['Swr Amt'].apply(clean_amt).sum():
 st.write(f"Actual Total DCRUA Charges: ${file['DCRUA Amt'].apply(clean_amt).sum():,.2f}")
 st.divider()
 st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
+
 st.divider()
 st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
 st.divider()
