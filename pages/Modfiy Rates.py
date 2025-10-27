@@ -113,10 +113,6 @@ def clean_amt(x):
     return float(str(x).replace(',', '').replace('$', ''))
 
 def check_actual(row):
-    global summed_water_charge_actual, summed_sewer_actual, summed_dcrua_actual
-    summed_water_charge_actual += 1#clean_amt(row['Wtr Amt'])
-    summed_sewer_actual += clean_amt(row['Swr Amt'])
-    summed_dcrua_actual += clean_amt(row['DCRUA Amt']) 
     return clean_amt(row['Wtr Amt']) + clean_amt(row['Swr Amt']) + clean_amt(row['DCRUA Amt'])
 
 def check_estimated(row):
@@ -244,6 +240,9 @@ def make_modified_fn(
 def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, ores_2_5, ores_5, icomm_2_5, icomm_5, ocomm_2_5, ocomm_5, ires_tier1, ires_tier2, ICOMM_tier1, ICOMM_tier2, ORES_tier1, ORES_tier2, OCOMM_tier1, OCOMM_tier2, sewer_rate, check_box_sewer_multiplier_enable, sewer_multiplier_rate, DCRUA_rate):
     df = df.copy()
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
+    summed_water_charge_actual = df['Wtr Amt'].apply(clean_amt).sum()
+    summed_sewer_actual = df['Swr Amt'].apply(clean_amt).sum()
+    summed_dcrua_actual = df['DCRUA Amt'].apply(clean_amt).sum()
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
     #call the refactored make_modified_fn with dynamic tier values
     modified_fn = make_modified_fn(
