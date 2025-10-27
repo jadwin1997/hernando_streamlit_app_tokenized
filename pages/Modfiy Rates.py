@@ -306,7 +306,7 @@ st.pyplot(fig)
 # --- Revenue summary ---
 st.subheader("Revenue Summary")
 st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
-st.write(file['Wtr Amt'].apply(clean_amt).sum())#f"Actual Total Water Charge: ${float(summed_water_charge_actual):,.2f}")
+st.write(f"Actual Total Water Charge: ${file['Wtr Amt'].apply(clean_amt).sum():,.2f}")
 st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
 st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
 diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
