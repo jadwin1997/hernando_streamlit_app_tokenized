@@ -650,9 +650,9 @@ actual_sewer = file['Swr Amt'].apply(clean_amt).sum()
 actual_dcrua = file['DCRUA Amt'].apply(clean_amt).sum()
 
 estimated_total_revenue = file["Estimated_Total_Bill"] = (
-    file.apply(get_water_rate_estimated, axis=1)
-    + file.apply(get_sewer_rate_estimated, axis=1)
-    + file.apply(get_dcrua_rate_estimated, axis=1)
+    file.apply(get_water_rate_estimated, axis=1).sum()
+    + file.apply(get_sewer_rate_estimated, axis=1).sum()
+    + file.apply(get_dcrua_rate_estimated, axis=1).sum()
 ).round(2)
 #file['Estimated_Total_Bill'].sum()#monthly_totals['Estimated_Total_Bill'].sum()
 estimated_water = file.apply(get_water_rate_estimated, axis=1).sum()
