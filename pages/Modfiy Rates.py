@@ -835,50 +835,6 @@ summary_table = summary_table.map(lambda x: f"${x:,.2f}" if isinstance(x, (int, 
 # Display the table in Streamlit
 st.table(summary_table)
 
-import pandas as pd
-
-# Create your summary table
-summary_table = pd.DataFrame({
-    "Category": [
-        "Total Revenue",
-        "Water Charges",
-        "Sewer Charges",
-        "DCRUA Charges"
-    ],
-    "Actual": [
-        actual_total_revenue,
-        actual_water,
-        actual_sewer,
-        actual_dcrua
-    ],
-    "Estimated": [
-        estimated_total_revenue,
-        estimated_water,
-        estimated_sewer,
-        estimated_dcrua
-    ],
-    "Modified": [
-        modified_total_revenue,
-        modified_water,
-        modified_sewer_rate,
-        modified_dcrua
-    ]
-})
-
-# --- Highlight function for one row ---
-def highlight_dcrua(row):
-    if row["Category"] == "DCRUA Charges":
-        return ['background-color: #f8d7da; color: #842029; font-weight: bold;'] * len(row)
-    else:
-        return [''] * len(row)
-
-# Apply style
-styled_table = summary_table.style.apply(highlight_dcrua, axis=1).format("${:,.2f}")
-
-# Display in Streamlit
-st.dataframe(styled_table, use_container_width=True)
-
-
 
 st.divider()
 diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
