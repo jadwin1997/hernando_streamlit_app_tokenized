@@ -666,15 +666,6 @@ import pandas as pd
 
 
 
-####DEBUGGING
-# Calculate breakdown sums
-water_est_sum = file.apply(get_water_rate_estimated, axis=1).sum()
-sewer_est_sum = file.apply(get_sewer_rate_estimated, axis=1).sum()
-dcrua_est_sum = file.apply(get_dcrua_rate_estimated, axis=1).sum()
-
-# Compare to total estimated revenue
-total_estimated = monthly_totals['Estimated_Total_Bill'].sum()
-
 # st.write("---- DEBUG SUMMARY ----")
 # st.write(f"Estimated total: ${total_estimated:,.2f}")
 # st.write(f"Component sum: ${(water_est_sum + sewer_est_sum + dcrua_est_sum):,.2f}")
