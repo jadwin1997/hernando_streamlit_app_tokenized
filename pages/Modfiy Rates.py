@@ -842,10 +842,10 @@ st.table(summary_table)
 
 
 st.divider()
-diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
-diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum()
-st.write(f"Difference (Actual - Estimated): ${diff_est:,.2f}")
-st.write(f"Difference (Modified - Actual): ${diff_mod:,.2f}")
+diff_est = actual_total_revenue - estimated_total_revenue
+diff_mod = actual_total_revenue - modified_total_revenue
+st.write(f"Actual Bill - Estimated Bill: ${diff_est:,.2f}")
+st.write(f"Actual Bill - Modified Bill: ${diff_mod:,.2f}")
 
 
 # --- Profits by Rate Class ---
