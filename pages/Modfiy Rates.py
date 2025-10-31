@@ -860,10 +860,10 @@ pct_diff_mod_estimate = (diff_mod / modified_total_revenue) * 100
 # --- Build comparison table ---
 diff_table = pd.DataFrame({
     "Comparison": [
-        "Actual − Estimated",
-        "Actual − Modified",
-        "Estimated − Actual",
-        "Modified − Actual"
+        "Actual Total Revenue − Estimated Total Revenue",
+        "Actual Total Revenue − Modified Total Revenue",
+        "Estimated Total Revenue − Actual Total Revenue",
+        "Modified Total Revenue − Actual Total Revenue"
     ],
     "Dollar Difference": [
         diff_est,
