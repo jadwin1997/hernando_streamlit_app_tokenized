@@ -842,11 +842,47 @@ st.table(summary_table)
 
 
 st.divider()
+# --- Differences ---
 diff_est = actual_total_revenue - estimated_total_revenue
 diff_mod = actual_total_revenue - modified_total_revenue
-st.write(f"Actual Bill - Estimated Bill: ${diff_est:,.2f}")
-st.write(f"Actual Bill - Modified Bill: ${diff_mod:,.2f}")
+diff_est_reverse = estimated_total_revenue - actual_total_revenue
+diff_mod_reverse = modified_total_revenue - actual_total_revenue
 
+# --- Percent differences ---
+pct_diff_est = (diff_est / actual_total_revenue) * 100
+pct_diff_mod = (diff_mod / actual_total_revenue) * 100
+
+# --- Build comparison table ---
+diff_table = pd.DataFrame({
+    "Comparison": [
+        "Actual − Estimated",
+        "Actual − Modified",
+        "Estimated − Actual",
+        "Modified − Actual"
+    ],
+    "Dollar Difference": [
+        diff_est,
+        diff_mod,
+        diff_est_reverse,
+        diff_mod_reverse
+    ],
+    "Percent Difference": [
+        pct_diff_est,
+        pct_diff_mod,
+        -pct_diff_est,
+        -pct_diff_mod
+    ]
+})
+
+# --- Format table for readability ---
+diff_table = diff_table.map(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+diff_table["Percent Difference"] = diff_table["Percent Difference"].apply(
+    lambda x: f"{float(x.strip('$')):.2f}%" if isinstance(x, str) else x
+)
+
+# --- Display ---
+st.subheader("Revenue Difference Summary")
+st.table(diff_table)
 
 # --- Profits by Rate Class ---
 st.subheader("Revenue by Water Rate Class (Actual Revenue)")
