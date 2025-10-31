@@ -664,38 +664,7 @@ modified_total_revenue = monthly_totals['Modified_Total_Estimated_Bill'].sum()
 # Create a dataframe for display
 import pandas as pd
 
-summary_table = pd.DataFrame({
-    "Category": [
-        "Total Revenue",
-        "Water Charges",
-        "Sewer Charges",
-        "DCRUA Charges"
-    ],
-    "Actual": [
-        actual_total_revenue,
-        actual_water,
-        actual_sewer,
-        actual_dcrua
-    ],
-    "Estimated": [
-        estimated_total_revenue,
-        estimated_water,
-        estimated_sewer,
-        estimated_dcrua
-    ],
-    "Modified": [
-        modified_total_revenue,
-        None,  # no breakdown provided for modified water/sewer/dcrua
-        None,
-        None
-    ]
-})
 
-# Format numbers nicely with commas and two decimals
-summary_table = summary_table.map(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
-
-# Display the table in Streamlit
-st.table(summary_table)
 
 ####DEBUGGING
 # Calculate breakdown sums
@@ -832,6 +801,46 @@ modified_dcrua = get_modified_dcrua(
 st.write(f"Modified Total Water Charges: ${file.apply(modified_wtr_rate, axis=1).sum():,.2f}")
 st.write(f"Modified Total Sewer Charges: ${file.apply(modified_sewer_rate, axis=1).sum():,.2f}")
 st.write(f"Modified Total DCRUA Charges: ${file.apply(modified_dcrua, axis=1).sum():,.2f}")
+modified_water = file.apply(modified_wtr_rate, axis=1).sum()
+modified_sewer_rate = file.apply(modified_sewer_rate, axis=1).sum()
+modified_dcrua = file.apply(modified_dcrua, axis=1).sum()
+modified_total_revenue = (modified_water+modified_sewer_rate+modified_dcrua).round(2)
+summary_table = pd.DataFrame({
+    "Category": [
+        "Total Revenue",
+        "Water Charges",
+        "Sewer Charges",
+        "DCRUA Charges"
+    ],
+    "Actual": [
+        actual_total_revenue,
+        actual_water,
+        actual_sewer,
+        actual_dcrua
+    ],
+    "Estimated": [
+        estimated_total_revenue,
+        estimated_water,
+        estimated_sewer,
+        estimated_dcrua
+    ],
+    "Modified": [
+        modified_total_revenue,
+        modified_water,  # no breakdown provided for modified water/sewer/dcrua
+        modified_sewer_rate,
+        modified_dcrua
+    ]
+})
+
+# Format numbers nicely with commas and two decimals
+summary_table = summary_table.map(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+
+# Display the table in Streamlit
+st.table(summary_table)
+
+
+
+
 st.divider()
 diff_est = monthly_totals['Actual_Total_Bill'].sum() - monthly_totals['Estimated_Total_Bill'].sum()
 diff_mod = monthly_totals['Modified_Total_Estimated_Bill'].sum() - monthly_totals['Actual_Total_Bill'].sum()
