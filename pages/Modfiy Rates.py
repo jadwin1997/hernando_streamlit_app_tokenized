@@ -842,28 +842,23 @@ st.table(summary_table)
 
 
 st.divider()
-
-# --- Compute differences ---
+# --- Differences ---
 diff_est = actual_total_revenue - estimated_total_revenue
 diff_mod = actual_total_revenue - modified_total_revenue
-
 diff_est_reverse = estimated_total_revenue - actual_total_revenue
 diff_mod_reverse = modified_total_revenue - actual_total_revenue
 
-# Percent differences
-pct_diff_est_actual = (diff_est / actual_total_revenue) * 100
-pct_diff_mod_actual = (diff_mod / actual_total_revenue) * 100
-
-pct_diff_est_estimate = (diff_est / estimated_total_revenue) * 100
-pct_diff_mod_estimate = (diff_mod / modified_total_revenue) * 100
+# --- Percent differences ---
+pct_diff_est = (diff_est / actual_total_revenue) * 100
+pct_diff_mod = (diff_mod / actual_total_revenue) * 100
 
 # --- Build comparison table ---
 diff_table = pd.DataFrame({
     "Comparison": [
         "Actual Total Revenue − Estimated Total Revenue",
         "Actual Total Revenue − Modified Total Revenue",
-        "Estimated Total Revenue − Actual Total Revenue",
-        "Modified Total Revenue − Actual Total Revenue"
+        "Estimated Total Revenue − Actual Total Revenue ",
+        "Modified Total Revenue − Actual Total Revenue "
     ],
     "Dollar Difference": [
         diff_est,
@@ -871,35 +866,23 @@ diff_table = pd.DataFrame({
         diff_est_reverse,
         diff_mod_reverse
     ],
-    "Percent of Actual": [
-        pct_diff_est_actual,
-        pct_diff_mod_actual,
-        -pct_diff_est_actual,
-        -pct_diff_mod_actual
-    ],
-    "Percent of Estimate": [
-        pct_diff_est_estimate,
-        pct_diff_mod_estimate,
-        -pct_diff_est_estimate,
-        -pct_diff_mod_estimate
+    "Percent Difference": [
+        pct_diff_est,
+        pct_diff_mod,
+        -pct_diff_est,
+        -pct_diff_mod
     ]
 })
 
 # --- Format table for readability ---
-def format_currency(x):
-    return f"${x:,.2f}" if isinstance(x, (int, float)) else x
-
-def format_percent(x):
-    return f"{x:.2f}%" if isinstance(x, (int, float)) else x
-
-diff_table["Dollar Difference"] = diff_table["Dollar Difference"].apply(format_currency)
-diff_table["Percent of Actual"] = diff_table["Percent of Actual"].apply(format_percent)
-diff_table["Percent of Estimate"] = diff_table["Percent of Estimate"].apply(format_percent)
+diff_table = diff_table.map(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+diff_table["Percent Difference"] = diff_table["Percent Difference"].apply(
+    lambda x: f"{float(x.strip('$')):.2f}%" if isinstance(x, str) else x
+)
 
 # --- Display ---
 st.subheader("Revenue Difference Summary")
 st.table(diff_table)
-
 
 # --- Profits by Rate Class ---
 st.subheader("Revenue by Water Rate Class (Actual Revenue)")
