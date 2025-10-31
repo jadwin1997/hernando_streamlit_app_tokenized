@@ -705,6 +705,18 @@ st.write("---- DEBUG SUMMARY ----")
 st.write(f"Estimated total: ${total_estimated:,.2f}")
 st.write(f"Component sum: ${(water_est_sum + sewer_est_sum + dcrua_est_sum):,.2f}")
 st.write(f"Difference: ${(total_estimated - (water_est_sum + sewer_est_sum + dcrua_est_sum)):,.2f}")
+# Compare per-row totals
+file["est_sum_components"] = (
+    file.apply(get_water_rate_estimated, axis=1)
+    + file.apply(get_sewer_rate_estimated, axis=1)
+    + file.apply(get_dcrua_rate_estimated, axis=1)
+)
+
+file["diff_per_row"] = file["Estimated_Total_Bill"] - file["est_sum_components"]
+
+st.write("Mean diff per row:", file["diff_per_row"].mean())
+st.write("Max diff per row:", file["diff_per_row"].max())
+st.write("Min diff per row:", file["diff_per_row"].min())
 
 
 
