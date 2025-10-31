@@ -626,19 +626,73 @@ ax.set_xlabel("Month")
 ax.legend()
 st.pyplot(fig)
 
+# # --- Revenue summary ---
+# st.subheader("Revenue Summary")
+# st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
+# st.write(f"Actual Total Water Charges: ${file['Wtr Amt'].apply(clean_amt).sum():,.2f}")
+# st.write(f"Actual Total Sewer Charges: ${file['Swr Amt'].apply(clean_amt).sum():,.2f}")
+# st.write(f"Actual Total DCRUA Charges: ${file['DCRUA Amt'].apply(clean_amt).sum():,.2f}")
+# st.divider()
+# st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
+# st.write(f"Estimated Total Water Charges: ${file.apply(get_water_rate_estimated, axis=1).sum():,.2f}")
+# st.write(f"Estimated Total Sewer Charges: ${file.apply(get_sewer_rate_estimated, axis=1).sum():,.2f}")
+# st.write(f"Estimated Total DCRUA Charges: ${file.apply(get_dcrua_rate_estimated, axis=1).sum():,.2f}")
+# st.divider()
+# st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
+
 # --- Revenue summary ---
 st.subheader("Revenue Summary")
-st.write(f"Actual Total Revenue: ${monthly_totals['Actual_Total_Bill'].sum():,.2f}")
-st.write(f"Actual Total Water Charges: ${file['Wtr Amt'].apply(clean_amt).sum():,.2f}")
-st.write(f"Actual Total Sewer Charges: ${file['Swr Amt'].apply(clean_amt).sum():,.2f}")
-st.write(f"Actual Total DCRUA Charges: ${file['DCRUA Amt'].apply(clean_amt).sum():,.2f}")
-st.divider()
-st.write(f"Estimated Total Revenue: ${monthly_totals['Estimated_Total_Bill'].sum():,.2f}")
-st.write(f"Estimated Total Water Charges: ${file.apply(get_water_rate_estimated, axis=1).sum():,.2f}")
-st.write(f"Estimated Total Sewer Charges: ${file.apply(get_sewer_rate_estimated, axis=1).sum():,.2f}")
-st.write(f"Estimated Total DCRUA Charges: ${file.apply(get_dcrua_rate_estimated, axis=1).sum():,.2f}")
-st.divider()
-st.write(f"Modified Total Revenue: ${monthly_totals['Modified_Total_Estimated_Bill'].sum():,.2f}")
+
+# Compute all totals first
+actual_total_revenue = monthly_totals['Actual_Total_Bill'].sum()
+actual_water = file['Wtr Amt'].apply(clean_amt).sum()
+actual_sewer = file['Swr Amt'].apply(clean_amt).sum()
+actual_dcrua = file['DCRUA Amt'].apply(clean_amt).sum()
+
+estimated_total_revenue = monthly_totals['Estimated_Total_Bill'].sum()
+estimated_water = file.apply(get_water_rate_estimated, axis=1).sum()
+estimated_sewer = file.apply(get_sewer_rate_estimated, axis=1).sum()
+estimated_dcrua = file.apply(get_dcrua_rate_estimated, axis=1).sum()
+
+modified_total_revenue = monthly_totals['Modified_Total_Estimated_Bill'].sum()
+
+# Create a dataframe for display
+import pandas as pd
+
+summary_table = pd.DataFrame({
+    "Category": [
+        "Total Revenue",
+        "Water Charges",
+        "Sewer Charges",
+        "DCRUA Charges"
+    ],
+    "Actual": [
+        actual_total_revenue,
+        actual_water,
+        actual_sewer,
+        actual_dcrua
+    ],
+    "Estimated": [
+        estimated_total_revenue,
+        estimated_water,
+        estimated_sewer,
+        estimated_dcrua
+    ],
+    "Modified": [
+        modified_total_revenue,
+        None,  # no breakdown provided for modified water/sewer/dcrua
+        None,
+        None
+    ]
+})
+
+# Format numbers nicely with commas and two decimals
+summary_table = summary_table.map(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+
+# Display the table in Streamlit
+st.table(summary_table)
+
+
 modified_wtr_rate = get_modified_water_charge(
         ires_base=ires_base,
         icomm_base=icomm_base,
