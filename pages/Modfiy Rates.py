@@ -649,7 +649,12 @@ actual_water = file['Wtr Amt'].apply(clean_amt).sum()
 actual_sewer = file['Swr Amt'].apply(clean_amt).sum()
 actual_dcrua = file['DCRUA Amt'].apply(clean_amt).sum()
 
-estimated_total_revenue = file['Estimated_Total_Bill'].sum()#monthly_totals['Estimated_Total_Bill'].sum()
+estimated_total_revenue = file["Estimated_Total_Bill"] = (
+    file.apply(get_water_rate_estimated, axis=1)
+    + file.apply(get_sewer_rate_estimated, axis=1)
+    + file.apply(get_dcrua_rate_estimated, axis=1)
+).round(2)
+#file['Estimated_Total_Bill'].sum()#monthly_totals['Estimated_Total_Bill'].sum()
 estimated_water = file.apply(get_water_rate_estimated, axis=1).sum()
 estimated_sewer = file.apply(get_sewer_rate_estimated, axis=1).sum()
 estimated_dcrua = file.apply(get_dcrua_rate_estimated, axis=1).sum()
@@ -697,7 +702,7 @@ st.table(summary_table)
 water_est_sum = file.apply(get_water_rate_estimated, axis=1).sum()
 sewer_est_sum = file.apply(get_sewer_rate_estimated, axis=1).sum()
 dcrua_est_sum = file.apply(get_dcrua_rate_estimated, axis=1).sum()
-
+""" 
 # Compare to total estimated revenue
 total_estimated = monthly_totals['Estimated_Total_Bill'].sum()
 
@@ -727,7 +732,7 @@ outliers = file.loc[file["diff_per_row"].abs() > 10, [
 
 st.write("⚠️ Outlier rows (diff > $10):")
 st.dataframe(outliers)
-
+ """
 
 
 modified_wtr_rate = get_modified_water_charge(
