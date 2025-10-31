@@ -23,13 +23,13 @@ st.markdown("""
 
 
  # --- Sidebar inputs (modify rates) ---
-st.sidebar.header("Modify Water & Sewer Base Rates")#st.sidebar.slider("Inside City Residential (IRES) base price:", 0.00, 50.00, 12.50,.01, key='ires_base_price')#
+st.sidebar.header("Modify Water Base Rates")#st.sidebar.slider("Inside City Residential (IRES) base price:", 0.00, 50.00, 12.50,.01, key='ires_base_price')#
 ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50, key='ires_base_price')
 icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50, key='icomm_base_price')
 ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00, key='ores_base_price')
 ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00, key='ocomm_base_price')
 
-st.sidebar.header("Modify Water & Sewer Variable Rates")
+st.sidebar.header("Modify Water Variable Rates")
 ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (tier 1)(default 2k–5k):", value=3.15, key='ires_t1_price')
 ires_5   = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (tier 2)(default >5k):", value=3.50, key='ires_t2_price')
 
