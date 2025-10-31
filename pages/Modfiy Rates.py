@@ -702,37 +702,37 @@ st.table(summary_table)
 water_est_sum = file.apply(get_water_rate_estimated, axis=1).sum()
 sewer_est_sum = file.apply(get_sewer_rate_estimated, axis=1).sum()
 dcrua_est_sum = file.apply(get_dcrua_rate_estimated, axis=1).sum()
-""" 
+
 # Compare to total estimated revenue
 total_estimated = monthly_totals['Estimated_Total_Bill'].sum()
 
-st.write("---- DEBUG SUMMARY ----")
-st.write(f"Estimated total: ${total_estimated:,.2f}")
-st.write(f"Component sum: ${(water_est_sum + sewer_est_sum + dcrua_est_sum):,.2f}")
-st.write(f"Difference: ${(total_estimated - (water_est_sum + sewer_est_sum + dcrua_est_sum)):,.2f}")
-# Compare per-row totals
-file["est_sum_components"] = (
-    file.apply(get_water_rate_estimated, axis=1)
-    + file.apply(get_sewer_rate_estimated, axis=1)
-    + file.apply(get_dcrua_rate_estimated, axis=1)
-)
+# st.write("---- DEBUG SUMMARY ----")
+# st.write(f"Estimated total: ${total_estimated:,.2f}")
+# st.write(f"Component sum: ${(water_est_sum + sewer_est_sum + dcrua_est_sum):,.2f}")
+# st.write(f"Difference: ${(total_estimated - (water_est_sum + sewer_est_sum + dcrua_est_sum)):,.2f}")
+# # Compare per-row totals
+# file["est_sum_components"] = (
+#     file.apply(get_water_rate_estimated, axis=1)
+#     + file.apply(get_sewer_rate_estimated, axis=1)
+#     + file.apply(get_dcrua_rate_estimated, axis=1)
+# )
 
-file["diff_per_row"] = file["Estimated_Total_Bill"] - file["est_sum_components"]
+# file["diff_per_row"] = file["Estimated_Total_Bill"] - file["est_sum_components"]
 
-st.write("Mean diff per row:", file["diff_per_row"].mean())
-st.write("Max diff per row:", file["diff_per_row"].max())
-st.write("Min diff per row:", file["diff_per_row"].min())
-# Find the rows with the largest absolute difference
-outliers = file.loc[file["diff_per_row"].abs() > 10, [
-    "AccountNumber",  # or whatever identifies your customer
-    "Estimated_Total_Bill",
-    "est_sum_components",
-    "diff_per_row"
-]]
+# st.write("Mean diff per row:", file["diff_per_row"].mean())
+# st.write("Max diff per row:", file["diff_per_row"].max())
+# st.write("Min diff per row:", file["diff_per_row"].min())
+# # Find the rows with the largest absolute difference
+# outliers = file.loc[file["diff_per_row"].abs() > 10, [
+#     "AccountNumber",  # or whatever identifies your customer
+#     "Estimated_Total_Bill",
+#     "est_sum_components",
+#     "diff_per_row"
+# ]]
 
-st.write("⚠️ Outlier rows (diff > $10):")
-st.dataframe(outliers)
- """
+# st.write("⚠️ Outlier rows (diff > $10):")
+# st.dataframe(outliers)
+ 
 
 
 modified_wtr_rate = get_modified_water_charge(
