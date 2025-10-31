@@ -798,9 +798,6 @@ modified_dcrua = get_modified_dcrua(
         DCRUA_base_rate = DCRUA_rate
         
     )
-st.write(f"Modified Total Water Charges: ${file.apply(modified_wtr_rate, axis=1).sum():,.2f}")
-st.write(f"Modified Total Sewer Charges: ${file.apply(modified_sewer_rate, axis=1).sum():,.2f}")
-st.write(f"Modified Total DCRUA Charges: ${file.apply(modified_dcrua, axis=1).sum():,.2f}")
 modified_water = file.apply(modified_wtr_rate, axis=1).sum()
 modified_sewer_rate = file.apply(modified_sewer_rate, axis=1).sum()
 modified_dcrua = file.apply(modified_dcrua, axis=1).sum()
