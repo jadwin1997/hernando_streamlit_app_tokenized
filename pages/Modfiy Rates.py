@@ -831,7 +831,7 @@ Actual: Actual total revenue, water charges, sewer, and DCRUA charges are calcul
             
 Estimated: Estimated total revenue, water charges, and sewer charges are calculated using the amount of gallons used multiplied by the current water and sewer rates. DCRUA totals remain as the actual amount charged in this column. 
 
-Modified: Modified total revenue, water charges, sewer charges, and DCRUA charges are calculated using the amount of gallons used multiplied by the proposed water, sewer, and DCRUA rates set by the user in the Modify Rates
+Modified: Modified total revenue, water charges, sewer charges, and DCRUA charges are calculated using the amount of gallons used multiplied by the proposed water, sewer, and DCRUA rates set by the user in the sidebar's input boxes
 """)
 
 
