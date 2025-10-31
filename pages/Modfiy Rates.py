@@ -717,6 +717,16 @@ file["diff_per_row"] = file["Estimated_Total_Bill"] - file["est_sum_components"]
 st.write("Mean diff per row:", file["diff_per_row"].mean())
 st.write("Max diff per row:", file["diff_per_row"].max())
 st.write("Min diff per row:", file["diff_per_row"].min())
+# Find the rows with the largest absolute difference
+outliers = file.loc[file["diff_per_row"].abs() > 10, [
+    "AccountNumber",  # or whatever identifies your customer
+    "Estimated_Total_Bill",
+    "est_sum_components",
+    "diff_per_row"
+]]
+
+st.write("⚠️ Outlier rows (diff > $10):")
+st.dataframe(outliers)
 
 
 
