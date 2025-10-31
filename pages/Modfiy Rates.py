@@ -24,10 +24,10 @@ st.markdown("""
 
  # --- Sidebar inputs (modify rates) ---
 st.sidebar.header("Modify Water Base Rates")#st.sidebar.slider("Inside City Residential (IRES) base price:", 0.00, 50.00, 12.50,.01, key='ires_base_price')#
-ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price:", value=12.50, key='ires_base_price')
-icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price:", value=12.50, key='icomm_base_price')
-ores_base = st.sidebar.number_input("Outside City (ORES) base price:", value=16.00, key='ores_base_price')
-ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price:", value=16.00, key='ocomm_base_price')
+ires_base = st.sidebar.number_input("Inside City Residential (IRES) base price ($):", value=12.50, key='ires_base_price')
+icomm_base = st.sidebar.number_input("Inside City Commercial (ICOMM) base price ($):", value=12.50, key='icomm_base_price')
+ores_base = st.sidebar.number_input("Outside City (ORES) base price ($):", value=16.00, key='ores_base_price')
+ocomm_base = st.sidebar.number_input("Outside City (OCOMM) base price ($):", value=16.00, key='ocomm_base_price')
 
 st.sidebar.header("Modify Water Variable Rates")
 ires_2_5 = st.sidebar.number_input("Inside City Residential (IRES) price/1000 gallons (tier 1)(default 2k–5k):", value=3.15, key='ires_t1_price')
@@ -822,6 +822,20 @@ summary_table = pd.DataFrame({
 
 # Format numbers nicely with commas and two decimals
 summary_table = summary_table.map(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+
+
+
+
+st.markdown("""
+Actual: Actual total revenue, water charges, sewer, and DCRUA charges are calculated by summing all of the customers bills.
+            
+Estimated: Estimated total revenue, water charges, and sewer charges are calculated using the amount of gallons used multiplied by the current water and sewer rates. DCRUA totals remain as the actual amount charged in this column. 
+
+Modified: Modified total revenue, water charges, sewer charges, and DCRUA charges are calculated using the amount of gallons used multiplied by the proposed water, sewer, and DCRUA rates set by the user in the Modify Rates
+""")
+
+
+
 
 # Display the table in Streamlit
 st.table(summary_table)
