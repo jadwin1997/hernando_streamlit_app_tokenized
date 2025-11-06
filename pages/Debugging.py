@@ -272,7 +272,8 @@ def compute_modified_bill(df,
     df['Wtr Rate'] = df['Wtr Rate'].astype(str).str.upper().str.strip()
     df['Swr Rate'] = df['Swr Rate'].astype(str).str.upper().str.strip()
     df['Status'] = df['Status'].astype(str)
-    df['DCRUA_amt_clean'] = df['DCRUA Amt'].apply(clean_amt)
+    df['DCRUA_amt_clean'] = clean_amt(df['DCRUA Amt'])
+
 
     active_mask = df['Status'].str.startswith('ACTIVE')
 
@@ -757,9 +758,9 @@ st.subheader("Revenue Summary")
 
 # Compute all totals first
 actual_total_revenue = monthly_totals['Actual_Total_Bill'].sum()
-actual_water = file['Wtr Amt'].apply(clean_amt).sum()
-actual_sewer = file['Swr Amt'].apply(clean_amt).sum()
-actual_dcrua = file['DCRUA Amt'].apply(clean_amt).sum()
+actual_water = clean_amt(file['Wtr Amt']).sum()
+actual_sewer = clean_amt(file['Swr Amt']).sum()
+actual_dcrua = clean_amt(file['DCRUA Amt']).sum()
 
 estimated_total_revenue = file["Estimated_Total_Bill"] = (
     file.apply(get_water_rate_estimated, axis=1).sum()
