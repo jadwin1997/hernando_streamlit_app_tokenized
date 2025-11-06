@@ -287,9 +287,9 @@ def get_sewer_rate_estimated_vectorized(df):
     # --- Clean columns ---
     df = df.copy()
     
-    # Convert strings with commas to numeric
+    # Convert strings with commas/dollar signs to numeric
     df['Billing_Cons_Num'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(float)
-    df['DCRUA_Amt_Num'] = df['DCRUA Amt'].apply(lambda x: float(str(x).replace(',','').replace('$','')) if pd.notna(x) else 0)
+    df['Swr_Amt_Num'] = df['Swr Amt'].apply(lambda x: float(str(x).replace(',', '').replace('$','')) if pd.notna(x) else 0)
 
     # Uppercase and strip rate/status columns
     df['Wtr_Rate'] = df['Wtr Rate'].astype(str).str.upper().str.strip()
@@ -322,11 +322,12 @@ def get_sewer_rate_estimated_vectorized(df):
     mask_s_o = df['Status_Active'] & df['Swr_Rate'].isin(['ORES','OCOMM'])
     sewer_charge.loc[mask_s_o] = (wtr_charge / 2).clip(lower=8.00)
 
-    # Optional fallback: for unknown rates, use DCRUA Amt
+    # Optional fallback: for unknown rates, use actual sewer amount
     mask_other = df['Status_Active'] & ~(df['Swr_Rate'].isin(['IRES','ICOMM','ORES','OCOMM']))
-    sewer_charge.loc[mask_other] = df.loc[mask_other, 'DCRUA_Amt_Num']
+    sewer_charge.loc[mask_other] = df.loc[mask_other, 'Swr_Amt_Num']
 
     return sewer_charge
+
 
 def get_sewer_rate_estimated(row):
     gallons = int(str(row["Billing Cons"]).replace(',',''))
