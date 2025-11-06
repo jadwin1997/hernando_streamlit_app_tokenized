@@ -284,32 +284,35 @@ def get_water_rate_estimated(row):
         return water_charge
     return 0
 def get_sewer_rate_estimated_vectorized(df):
-    # --- Clean columns ---
     df = df.copy()
     
-    # Convert strings with commas/dollar signs to numeric
+    # --- Clean numeric columns ---
     df['Billing_Cons_Num'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(float)
     df['Swr_Amt_Num'] = df['Swr Amt'].apply(lambda x: float(str(x).replace(',', '').replace('$','')) if pd.notna(x) else 0)
 
-    # Uppercase and strip rate/status columns
+    # --- Uppercase/strip ---
     df['Wtr_Rate'] = df['Wtr Rate'].astype(str).str.upper().str.strip()
     df['Swr_Rate'] = df['Swr Rate'].astype(str).str.upper().str.strip()
     df['Status_Active'] = df['Status'].astype(str).str[:6] == 'ACTIVE'
 
     # --- Water charge ---
     wtr_charge = pd.Series(0, index=df.index, dtype=float)
-
-    # IRES/ICOMM rates
     mask_i = df['Status_Active'] & df['Wtr_Rate'].isin(['IRES','ICOMM'])
-    wtr_charge.loc[mask_i & (df['Billing_Cons_Num'] <= 2)] = 12.50
-    wtr_charge.loc[mask_i & (df['Billing_Cons_Num'] > 2) & (df['Billing_Cons_Num'] <= 5)] = 12.50 + (df.loc[mask_i & (df['Billing_Cons_Num'] > 2) & (df['Billing_Cons_Num'] <= 5), 'Billing_Cons_Num'] - 2) * 3.15
-    wtr_charge.loc[mask_i & (df['Billing_Cons_Num'] > 5)] = 12.50 + 3*3.15 + (df.loc[mask_i & (df['Billing_Cons_Num'] > 5), 'Billing_Cons_Num'] - 5) * 3.50
-
-    # ORES/OCOMM rates
     mask_o = df['Status_Active'] & df['Wtr_Rate'].isin(['ORES','OCOMM'])
+
+    # IRES/ICOMM
+    wtr_charge.loc[mask_i & (df['Billing_Cons_Num'] <= 2)] = 12.50
+    wtr_charge.loc[mask_i & (df['Billing_Cons_Num'] > 2) & (df['Billing_Cons_Num'] <= 5)] = \
+        12.50 + (df.loc[mask_i & (df['Billing_Cons_Num'] > 2) & (df['Billing_Cons_Num'] <= 5), 'Billing_Cons_Num'] - 2) * 3.15
+    wtr_charge.loc[mask_i & (df['Billing_Cons_Num'] > 5)] = 12.50 + 3*3.15 + \
+        (df.loc[mask_i & (df['Billing_Cons_Num'] > 5), 'Billing_Cons_Num'] - 5) * 3.50
+
+    # ORES/OCOMM
     wtr_charge.loc[mask_o & (df['Billing_Cons_Num'] <= 3)] = 16.00
-    wtr_charge.loc[mask_o & (df['Billing_Cons_Num'] > 3) & (df['Billing_Cons_Num'] <= 5)] = 16.00 + (df.loc[mask_o & (df['Billing_Cons_Num'] > 3) & (df['Billing_Cons_Num'] <= 5), 'Billing_Cons_Num'] - 3) * 3.50
-    wtr_charge.loc[mask_o & (df['Billing_Cons_Num'] > 5)] = 16.00 + 2*3.50 + (df.loc[mask_o & (df['Billing_Cons_Num'] > 5), 'Billing_Cons_Num'] - 5) * 3.95
+    wtr_charge.loc[mask_o & (df['Billing_Cons_Num'] > 3) & (df['Billing_Cons_Num'] <= 5)] = \
+        16.00 + (df.loc[mask_o & (df['Billing_Cons_Num'] > 3) & (df['Billing_Cons_Num'] <= 5), 'Billing_Cons_Num'] - 3) * 3.50
+    wtr_charge.loc[mask_o & (df['Billing_Cons_Num'] > 5)] = 16.00 + 2*3.50 + \
+        (df.loc[mask_o & (df['Billing_Cons_Num'] > 5), 'Billing_Cons_Num'] - 5) * 3.95
 
     # --- Sewer charge ---
     sewer_charge = pd.Series(0, index=df.index, dtype=float)
@@ -322,9 +325,13 @@ def get_sewer_rate_estimated_vectorized(df):
     mask_s_o = df['Status_Active'] & df['Swr_Rate'].isin(['ORES','OCOMM'])
     sewer_charge.loc[mask_s_o] = (wtr_charge / 2).clip(lower=8.00)
 
-    # Optional fallback: for unknown rates, use actual sewer amount
-    mask_other = df['Status_Active'] & ~(df['Swr_Rate'].isin(['IRES','ICOMM','ORES','OCOMM']))
-    sewer_charge.loc[mask_other] = df.loc[mask_other, 'Swr_Amt_Num']
+    # Unknown water rates but known sewer rates: use actual sewer if water_charge = 0
+    mask_water_zero = df['Status_Active'] & (wtr_charge == 0) & df['Swr_Rate'].isin(['IRES','ICOMM','ORES','OCOMM'])
+    sewer_charge.loc[mask_water_zero] = df.loc[mask_water_zero, 'Swr_Amt_Num']
+
+    # Unknown sewer rates: use actual sewer amount
+    mask_unknown_swr = df['Status_Active'] & ~df['Swr_Rate'].isin(['IRES','ICOMM','ORES','OCOMM'])
+    sewer_charge.loc[mask_unknown_swr] = df.loc[mask_unknown_swr, 'Swr_Amt_Num']
 
     return sewer_charge
 
