@@ -115,18 +115,33 @@ def clean_amt(series):
         .str.replace('[\$,]', '', regex=True)
         .astype(float)
     )
-
+# --- Helpers ---
+def clean_amt_row(x):
+    return float(str(x).replace(',', '').replace('$', ''))
 def check_actual(row):
     return clean_amt(row['Wtr Amt']) + clean_amt(row['Swr Amt']) + clean_amt(row['DCRUA Amt'])
 
 def check_actual_wtr(row):
-    return clean_amt(row['Wtr Amt'])
+    try:
+    
+        return clean_amt(row['Wtr Amt'])
+    except:
+        return clean_amt_row(row['Wtr Amt'])
+
 
 def check_actual_swr(row):
-    return clean_amt(row['Swr Amt'])
+    try:
+    
+        return clean_amt(row['Swr Amt'])
+    except:
+        return clean_amt_row(row['Swr Amt'])
 
 def check_actual_dcrua(row):
-    return clean_amt(row['DCRUA Amt'])
+    try:
+    
+        return clean_amt(row['DCRUA Amt'])
+    except:
+        return clean_amt_row(row['DCRUA Amt'])
 
 def check_estimated(df):
     df = df.copy()
