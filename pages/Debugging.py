@@ -148,17 +148,21 @@ def check_actual_dcrua(row):
 
 def check_estimated(df):
     df = df.copy()
+    
+    # --- Clean columns ---
     df['Gallons'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(int)
     df['Wtr Rate'] = df['Wtr Rate'].astype(str).str.upper().str.strip()
     df['Swr Rate'] = df['Swr Rate'].astype(str).str.upper().str.strip()
     df['Status'] = df['Status'].astype(str)
-    df['DCRUA Amt_clean'] = clean_amt(df['DCRUA Amt'])
+    df['Swr_Amt_Num'] = df['Swr Amt'].apply(lambda x: float(str(x).replace(',', '').replace('$','')) if pd.notna(x) else 0)
 
     active = df['Status'].str.startswith('ACTIVE')
+
+    # --- Water Charges ---
     ires_icomm = df['Wtr Rate'].isin(['IRES', 'ICOMM'])
     ores_ocomm = df['Wtr Rate'].isin(['ORES', 'OCOMM'])
 
-    # --- Water Charges ---
+    # IRES/ICOMM
     cond_ir = [
         df['Gallons'] <= 2,
         (df['Gallons'] > 2) & (df['Gallons'] <= 5),
@@ -171,6 +175,7 @@ def check_estimated(df):
     ]
     w_ir = np.select(cond_ir, ch_ir, default=0)
 
+    # ORES/OCOMM
     cond_or = [
         df['Gallons'] <= 3,
         (df['Gallons'] > 3) & (df['Gallons'] <= 5),
@@ -188,23 +193,27 @@ def check_estimated(df):
     # --- Sewer Charges ---
     ires_icomm_swr = df['Swr Rate'].isin(['IRES', 'ICOMM'])
     ores_ocomm_swr = df['Swr Rate'].isin(['ORES', 'OCOMM'])
-    df['Sewer_Charge'] = np.select(
-        [ires_icomm_swr, ores_ocomm_swr],
-        [
-            np.maximum(df['Water_Charge'] / 2, 6.25) + df['DCRUA Amt_clean'],
-            np.maximum(df['Water_Charge'] / 2, 8.00) + df['DCRUA Amt_clean']
-        ],
-        default=0
-    )
+
+    # Base sewer charge from water charge
+    sewer_charge = np.zeros(len(df))
+    sewer_charge[ires_icomm_swr] = np.maximum(df.loc[ires_icomm_swr, 'Water_Charge'] / 2, 6.25)
+    sewer_charge[ores_ocomm_swr] = np.maximum(df.loc[ores_ocomm_swr, 'Water_Charge'] / 2, 8.00)
+
+    # Fallback: if water charge = 0 but sewer rate known, use actual sewer amount
+    mask_water_zero = (df['Water_Charge'] == 0) & (df['Swr Rate'].isin(['IRES','ICOMM','ORES','OCOMM']))
+    sewer_charge[mask_water_zero] = df.loc[mask_water_zero, 'Swr_Amt_Num']
+
+    # Fallback: unknown sewer rates
+    mask_unknown_swr = ~df['Swr Rate'].isin(['IRES','ICOMM','ORES','OCOMM'])
+    sewer_charge[mask_unknown_swr] = df.loc[mask_unknown_swr, 'Swr_Amt_Num']
+
+    df['Sewer_Charge'] = sewer_charge
 
     # --- Total ---
-    df['Estimated_Total_Bill'] = np.where(
-        active, df['Water_Charge'] + df['Sewer_Charge'], 0
-    )
+    df['Estimated_Total_Bill'] = np.where(active, df['Water_Charge'] + df['Sewer_Charge'], 0)
 
     return df
 
-#
 
 
 def get_water_rate_estimated_vectorized(df):
