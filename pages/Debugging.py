@@ -639,37 +639,34 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
     df['Actual_Total_Bill'] = df.apply(check_actual, axis=1)
     df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
     #call the refactored make_modified_fn with dynamic tier values
-    df = make_modified_fn(df,
+    df = make_modified_fn(
+        df,
         ires_base=ires_base,
         icomm_base=icomm_base,
         ores_base=ores_base,
         ocomm_base=ocomm_base,
-        
         ires_t1_max=ires_tier1,
         ires_t2_max=ires_tier2,
         ires_t2_rate=ires_2_5,
         ires_t3_rate=ires_5,
-        
         icomm_t1_max=ICOMM_tier1,
         icomm_t2_max=ICOMM_tier2,
         icomm_t2_rate=icomm_2_5,
         icomm_t3_rate=icomm_5,
-        
         ores_t1_max=ORES_tier1,
         ores_t2_max=ORES_tier2,
         ores_t2_rate=ores_2_5,
         ores_t3_rate=ores_5,
-        
         ocomm_t1_max=OCOMM_tier1,
         ocomm_t2_max=OCOMM_tier2,
         ocomm_t2_rate=ocomm_2_5,
         ocomm_t3_rate=ocomm_5,
-        base_sewer_rate = sewer_rate, 
-        sewer_multiplier_enable = check_box_sewer_multiplier_enable, 
-        sewer_multiplier = sewer_multiplier_rate, 
-        DCRUA_base_rate = DCRUA_rate
-        
+        base_sewer_rate=sewer_rate,
+        sewer_multiplier_enable=check_box_sewer_multiplier_enable,
+        sewer_multiplier_rate=sewer_multiplier_rate,   # ✅ new name
+        DCRUA_rate=DCRUA_rate
     )
+
 
     # Apply the function row-wise to your DataFrame
     df['Modified_Total_Estimated_Bill'] = df.apply(modified_fn, axis=1)
