@@ -186,6 +186,60 @@ def check_estimated(df):
 
     return df
 
+#
+
+
+def get_water_rate_estimated_vectorized(df):
+    # Clean and prepare columns
+    df = df.copy()
+    df['Gallons'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(int)
+    df['Wtr_Rate'] = df['Wtr Rate'].astype(str).str.upper().str.strip()
+    df['Status'] = df['Status'].astype(str).str.upper()
+    
+    # Initialize the water charge column
+    df['Estimated_Water_Charge'] = 0.0
+    
+    # Only active accounts
+    active_mask = df['Status'].str.startswith('ACTIVE')
+    
+    # IRES / ICOMM rates
+    ires_mask = active_mask & df['Wtr_Rate'].isin(['IRES', 'ICOMM'])
+    ires_gallons = df.loc[ires_mask, 'Gallons']
+    ires_charge = np.where(
+        ires_gallons <= 2,
+        12.50,
+        np.where(
+            ires_gallons <= 5,
+            12.50 + (ires_gallons - 2) * 3.15,
+            12.50 + 3 * 3.15 + (ires_gallons - 5) * 3.50
+        )
+    )
+    df.loc[ires_mask, 'Estimated_Water_Charge'] = ires_charge
+    
+    # ORES / OCOMM rates
+    ores_mask = active_mask & df['Wtr_Rate'].isin(['ORES', 'OCOMM'])
+    ores_gallons = df.loc[ores_mask, 'Gallons']
+    ores_charge = np.where(
+        ores_gallons <= 3,
+        16.00,
+        np.where(
+            ores_gallons <= 5,
+            16.00 + (ores_gallons - 3) * 3.50,
+            16.00 + 2 * 3.50 + (ores_gallons - 5) * 3.95
+        )
+    )
+    df.loc[ores_mask, 'Estimated_Water_Charge'] = ores_charge
+    
+    # Optional: for other rates, fallback to check_actual_wtr
+    other_mask = active_mask & ~df['Wtr_Rate'].isin(['IRES','ICOMM','ORES','OCOMM'])
+    if other_mask.any():
+        df.loc[other_mask, 'Estimated_Water_Charge'] = df.loc[other_mask].apply(check_actual_wtr, axis=1)
+    
+    return df['Estimated_Water_Charge']
+
+
+
+
 
 def get_water_rate_estimated(row):
     gallons = int(str(row["Billing Cons"]).replace(',',''))
@@ -761,14 +815,16 @@ actual_total_revenue = monthly_totals['Actual_Total_Bill'].sum()
 actual_water = clean_amt(file['Wtr Amt']).sum()
 actual_sewer = clean_amt(file['Swr Amt']).sum()
 actual_dcrua = clean_amt(file['DCRUA Amt']).sum()
-
-estimated_total_revenue = file["Estimated_Total_Bill"] = (
-    file.apply(get_water_rate_estimated, axis=1).sum()
-    + file.apply(get_sewer_rate_estimated, axis=1).sum()
-    + file.apply(get_dcrua_rate_estimated, axis=1).sum()
-).round(2)
+estimated_total_revenue = file['Estimated_Total_Bill'].sum()
+# estimated_total_revenue = file["Estimated_Total_Bill"] = (
+#     file.apply(get_water_rate_estimated, axis=1).sum()
+#     + file.apply(get_sewer_rate_estimated, axis=1).sum()
+#     + file.apply(get_dcrua_rate_estimated, axis=1).sum()
+# ).round(2)
 #file['Estimated_Total_Bill'].sum()#monthly_totals['Estimated_Total_Bill'].sum()
-estimated_water = file.apply(get_water_rate_estimated, axis=1).sum()
+estimated_water = get_water_rate_estimated_vectorized(file).sum()
+
+#file.apply(get_water_rate_estimated, axis=1).sum()
 estimated_sewer = file.apply(get_sewer_rate_estimated, axis=1).sum()
 estimated_dcrua = file.apply(get_dcrua_rate_estimated, axis=1).sum()
 
