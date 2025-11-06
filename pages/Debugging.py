@@ -821,7 +821,7 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
     df['Swr Amt_clean'] +
     df['DCRUA Amt_clean']
     )
-    df = check_estimated(df)
+    df = check_estimated_vectorized_fixed(df)
 
 
 
