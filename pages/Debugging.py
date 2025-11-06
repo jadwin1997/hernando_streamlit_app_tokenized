@@ -110,11 +110,14 @@ raw = load_csv_from_github(GITHUB_OWNER, GITHUB_REPO, CSV_PATH, GITHUB_TOKEN)
 
 # --- Helpers ---
 def clean_amt(series):
-    return (
-        series.astype(str)
-        .str.replace('[\$,]', '', regex=True)
-        .astype(float)
-    )
+    try:
+        return (
+            series.astype(str)
+            .str.replace('[\$,]', '', regex=True)
+            .astype(float)
+        )
+    except:
+        return float(str(series).replace(',', '').replace('$', ''))
 # --- Helpers ---
 def clean_amt_row(x):
     return float(str(x).replace(',', '').replace('$', ''))
