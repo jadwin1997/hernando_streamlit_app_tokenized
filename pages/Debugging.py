@@ -146,7 +146,7 @@ def check_actual_dcrua(row):
     except:
         return clean_amt_row(row['DCRUA Amt'])
 
-def check_estimated(df):
+def check_estimated_vectorized_fixed(df):
     df = df.copy()
     
     # --- Clean columns ---
@@ -155,6 +155,7 @@ def check_estimated(df):
     df['Swr Rate'] = df['Swr Rate'].astype(str).str.upper().str.strip()
     df['Status'] = df['Status'].astype(str)
     df['Swr_Amt_Num'] = df['Swr Amt'].apply(lambda x: float(str(x).replace(',', '').replace('$','')) if pd.notna(x) else 0)
+    df['DCRUA_Num'] = df['DCRUA Amt'].apply(lambda x: float(str(x).replace(',', '').replace('$','')) if pd.notna(x) else 0)
 
     active = df['Status'].str.startswith('ACTIVE')
 
@@ -194,16 +195,13 @@ def check_estimated(df):
     ires_icomm_swr = df['Swr Rate'].isin(['IRES', 'ICOMM'])
     ores_ocomm_swr = df['Swr Rate'].isin(['ORES', 'OCOMM'])
 
-    # Base sewer charge from water charge
     sewer_charge = np.zeros(len(df))
-    sewer_charge[ires_icomm_swr] = np.maximum(df.loc[ires_icomm_swr, 'Water_Charge'] / 2, 6.25)
-    sewer_charge[ores_ocomm_swr] = np.maximum(df.loc[ores_ocomm_swr, 'Water_Charge'] / 2, 8.00)
+    
+    # Recognized sewer rates: add DCRUA like row-wise logic
+    sewer_charge[ires_icomm_swr] = np.maximum(df.loc[ires_icomm_swr, 'Water_Charge'] / 2, 6.25) + df.loc[ires_icomm_swr, 'DCRUA_Num']
+    sewer_charge[ores_ocomm_swr] = np.maximum(df.loc[ores_ocomm_swr, 'Water_Charge'] / 2, 8.00) + df.loc[ores_ocomm_swr, 'DCRUA_Num']
 
-    # Fallback: if water charge = 0 but sewer rate known, use actual sewer amount
-    mask_water_zero = (df['Water_Charge'] == 0) & (df['Swr Rate'].isin(['IRES','ICOMM','ORES','OCOMM']))
-    sewer_charge[mask_water_zero] = df.loc[mask_water_zero, 'Swr_Amt_Num']
-
-    # Fallback: unknown sewer rates
+    # Unknown sewer rates fallback to actual sewer amount
     mask_unknown_swr = ~df['Swr Rate'].isin(['IRES','ICOMM','ORES','OCOMM'])
     sewer_charge[mask_unknown_swr] = df.loc[mask_unknown_swr, 'Swr_Amt_Num']
 
@@ -213,7 +211,6 @@ def check_estimated(df):
     df['Estimated_Total_Bill'] = np.where(active, df['Water_Charge'] + df['Sewer_Charge'], 0)
 
     return df
-
 
 
 def get_water_rate_estimated_vectorized(df):
