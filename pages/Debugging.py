@@ -358,7 +358,7 @@ def compute_modified_bill(df,
     df = df.copy()
 
     # --- Preprocess ---
-    df['Gallons'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(float)
+    df['Gallons'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(int)
     df['Wtr Rate'] = df['Wtr Rate'].astype(str).str.upper().str.strip()
     df['Swr Rate'] = df['Swr Rate'].astype(str).str.upper().str.strip()
     df['Status'] = df['Status'].astype(str)
