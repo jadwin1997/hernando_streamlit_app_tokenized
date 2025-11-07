@@ -335,6 +335,25 @@ def compute_modified_bill(df,
                           ores_t1_max, ores_t2_max, ores_t2_rate, ores_t3_rate,
                           ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate,
                           base_sewer_rate, sewer_multiplier_enable, sewer_multiplier_rate, DCRUA_rate):
+    
+
+     # --- Clean numeric amount columns ---
+    for col, raw in [
+        ('Wtr_Amt_Num', 'Wtr Amt'),
+        ('Swr_Amt_Num', 'Swr Amt'),
+        ('DCRUA_Num', 'DCRUA Amt')
+    ]:
+        if col not in df.columns:
+            if raw in df.columns:
+                df[col] = (
+                    df[raw]
+                    .astype(str)
+                    .str.replace(r'[\$,]', '', regex=True)
+                    .replace('', '0')
+                    .astype(float)
+                )
+            else:
+                df[col] = 0.0
 
     df = df.copy()
 
