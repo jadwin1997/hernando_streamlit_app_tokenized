@@ -756,9 +756,9 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
 
     df['Actual_Total_Bill'] = (
     df['Wtr Amt_clean'] +
-    df['Swr Amt_clean'] +
-    df['DCRUA Amt_clean']
-    )
+    df['Swr Amt_clean']) #+
+    #df['DCRUA Amt_clean']
+    #)
     df = check_estimated_vectorized_final(df)
 
 
