@@ -813,7 +813,7 @@ def preprocess(df,ires_base,icomm_base,ores_base,ocomm_base, ires_2_5, ires_5, o
     )
     df = check_estimated_vectorized_final(df)
     print("HELLO EVERYONE",df['Sewer_Charge'].sum())
-
+    st.sidebar.header(df['Sewer_Charge'].sum())
 
     #df.apply(check_actual, axis=1)
     #df['Estimated_Total_Bill'] = df.apply(check_estimated, axis=1)
