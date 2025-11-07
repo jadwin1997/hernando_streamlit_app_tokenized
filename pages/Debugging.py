@@ -278,30 +278,7 @@ def get_water_rate_estimated_vectorized(df):
 
 
 
-def get_water_rate_estimated(row):
-    gallons = int(str(row["Billing Cons"]).replace(',',''))
-    wtr_rate = str(row["Wtr Rate"]).upper().strip()
-    water_charge = 0
-    if 'ACTIVE' in str(row['Status'])[:6]:
-        # WATER
-        if wtr_rate in ["IRES", "ICOMM"]:
-            if gallons <= 2:
-                water_charge = 12.50
-            elif gallons <= 5:
-                water_charge = 12.50 + (gallons - 2) * 3.15
-            else:
-                water_charge = 12.50 + (3 * 3.15) + (gallons - 5) * 3.50
-        elif wtr_rate in ["ORES", "OCOMM"]:
-            if gallons <= 3:
-                water_charge = 16.00
-            elif gallons <= 5:
-                water_charge = 16.00 + (gallons - 3) * 3.50
-            else:
-                water_charge = 16.00 + (2 * 3.50) + (gallons - 5) * 3.95
-        else:
-            return check_actual_wtr(row)
-        return water_charge
-    return 0
+
 def get_sewer_rate_estimated_vectorized(df):
     df = df.copy()
     
