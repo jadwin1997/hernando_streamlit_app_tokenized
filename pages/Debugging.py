@@ -895,7 +895,7 @@ estimated_sewer = get_sewer_rate_estimated_vectorized(file)
 estimated_sewer = estimated_sewer['Estimated_Total_Bill'].sum()
 #estimated_sewer = file.apply(get_sewer_rate_estimated, axis=1).sum()
 estimated_dcrua = clean_amt(file['DCRUA Amt']).sum()#file.apply(get_dcrua_rate_estimated, axis=1).sum()
-estimated_total_revenue = check_estimated_vectorized_final(file).sum()#estimated_water+estimated_sewer+estimated_dcrua
+estimated_total_revenue = estimated_sewer+estimated_water+estimated_dcrua#check_estimated_vectorized_final(file).sum()#estimated_water+estimated_sewer+estimated_dcrua
 modified_total_revenue = monthly_totals['Modified_Total_Estimated_Bill'].sum()
 
 # Create a dataframe for display
