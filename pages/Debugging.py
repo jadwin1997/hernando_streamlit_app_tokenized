@@ -396,28 +396,25 @@ def compute_modified_bill(df,
         default=0
     )
 
-    # --- Sewer Charges (without DCRUA) ---
-    sewer_i = np.where(
-        sewer_multiplier_enable,
-        np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 6.25),
-        np.maximum(df['Gallons'] * base_sewer_rate, 6.25)
+    # --- Sewer Charges (includes DCRUA like rowwise logic) ---
+    if sewer_multiplier_enable:
+        sewer_i = np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 6.25) + df['Gallons'] * DCRUA_rate
+        sewer_o = np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 8.00) + df['Gallons'] * DCRUA_rate
+    else:
+        sewer_i = np.maximum(df['Gallons'] * base_sewer_rate, 6.25) + df['Gallons'] * DCRUA_rate
+        sewer_o = np.maximum(df['Gallons'] * base_sewer_rate, 8.00) + df['Gallons'] * DCRUA_rate
+
+    # Assign sewer charge only for recognized rates
+    df['Sewer_Charge'] = np.select(
+        [ires_icomm_swr, ores_ocomm_swr],
+        [sewer_i, sewer_o],
+        default=0
     )
-
-    sewer_o = np.where(
-        sewer_multiplier_enable,
-        np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 8.00),
-        np.maximum(df['Gallons'] * base_sewer_rate, 8.00)
-    )
-
-    df['Sewer_Charge'] = np.select([ires_icomm_swr, ores_ocomm_swr], [sewer_i, sewer_o], default=0)
-
-    # --- DCRUA Charges (applies to all active accounts) ---
-    df['DCRUA_Charge'] = df['Gallons'] * DCRUA_rate
 
     # --- Final Total ---
     df['Modified_Total_Estimated_Bill'] = np.where(
         active_mask,
-        df['Water_Charge'] + df['Sewer_Charge'] + df['DCRUA_Charge'],
+        df['Water_Charge'] + df['Sewer_Charge'],
         0
     )
 
