@@ -325,6 +325,9 @@ def get_dcrua_rate_estimated(row):
     return(clean_amt(row['DCRUA Amt']))
 
 
+import numpy as np
+import pandas as pd
+
 def compute_modified_bill(df,
                           ires_base, icomm_base, ores_base, ocomm_base,
                           ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate,
@@ -336,89 +339,98 @@ def compute_modified_bill(df,
     df = df.copy()
 
     # --- Preprocess ---
-    df['Gallons'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(int)
+    df['Gallons'] = df['Billing Cons'].astype(str).str.replace(',', '').astype(float)
     df['Wtr Rate'] = df['Wtr Rate'].astype(str).str.upper().str.strip()
     df['Swr Rate'] = df['Swr Rate'].astype(str).str.upper().str.strip()
     df['Status'] = df['Status'].astype(str)
 
+    # Clean numeric amount columns if needed
+    for col in ['Wtr_Amt_Num', 'Swr_Amt_Num', 'DCRUA_Num']:
+        if col not in df.columns:
+            raise ValueError(f"Missing column: {col}")
+        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+
     active_mask = df['Status'].str.startswith('ACTIVE')
 
-    # --- Water Rate Masks ---
+    # --- Rate masks ---
+    valid_wtr = df['Wtr Rate'].isin(['IRES', 'ICOMM', 'ORES', 'OCOMM'])
+    valid_swr = df['Swr Rate'].isin(['IRES', 'ICOMM', 'ORES', 'OCOMM'])
+    valid_both = valid_wtr & valid_swr
+
     ires_mask = df['Wtr Rate'] == "IRES"
     icomm_mask = df['Wtr Rate'] == "ICOMM"
     ores_mask = df['Wtr Rate'] == "ORES"
     ocomm_mask = df['Wtr Rate'] == "OCOMM"
 
-    # --- Sewer Rate Masks ---
-    ires_icomm_swr = df['Swr Rate'].isin(['IRES', 'ICOMM'])
-    ores_ocomm_swr = df['Swr Rate'].isin(['ORES', 'OCOMM'])
-
     # --- Water Charges ---
-    w_ires = np.select(
-        [df['Gallons'] <= ires_t1_max,
-         (df['Gallons'] > ires_t1_max) & (df['Gallons'] <= ires_t2_max),
-         df['Gallons'] > ires_t2_max],
-        [ires_base,
-         ires_base + (df['Gallons'] - ires_t1_max) * ires_t2_rate,
-         ires_base + (ires_t2_max - ires_t1_max) * ires_t2_rate + (df['Gallons'] - ires_t2_max) * ires_t3_rate]
-    )
-
-    w_icomm = np.select(
-        [df['Gallons'] <= icomm_t1_max,
-         (df['Gallons'] > icomm_t1_max) & (df['Gallons'] <= icomm_t2_max),
-         df['Gallons'] > icomm_t2_max],
-        [icomm_base,
-         icomm_base + (df['Gallons'] - icomm_t1_max) * icomm_t2_rate,
-         icomm_base + (icomm_t2_max - icomm_t1_max) * icomm_t2_rate + (df['Gallons'] - icomm_t2_max) * icomm_t3_rate]
-    )
-
-    w_ores = np.select(
-        [df['Gallons'] <= ores_t1_max,
-         (df['Gallons'] > ores_t1_max) & (df['Gallons'] <= ores_t2_max),
-         df['Gallons'] > ores_t2_max],
-        [ores_base,
-         ores_base + (df['Gallons'] - ores_t1_max) * ores_t2_rate,
-         ores_base + (ores_t2_max - ores_t1_max) * ores_t2_rate + (df['Gallons'] - ores_t2_max) * ores_t3_rate]
-    )
-
-    w_ocomm = np.select(
-        [df['Gallons'] <= ocomm_t1_max,
-         (df['Gallons'] > ocomm_t1_max) & (df['Gallons'] <= ocomm_t2_max),
-         df['Gallons'] > ocomm_t2_max],
-        [ocomm_base,
-         ocomm_base + (df['Gallons'] - ocomm_t1_max) * ocomm_t2_rate,
-         ocomm_base + (ocomm_t2_max - ocomm_t1_max) * ocomm_t2_rate + (df['Gallons'] - ocomm_t2_max) * ocomm_t3_rate]
-    )
+    def tiered_charge(base, t1_max, t2_max, t2_rate, t3_rate):
+        return np.select(
+            [
+                df['Gallons'] <= t1_max,
+                (df['Gallons'] > t1_max) & (df['Gallons'] <= t2_max),
+                df['Gallons'] > t2_max
+            ],
+            [
+                base,
+                base + (df['Gallons'] - t1_max) * t2_rate,
+                base + (t2_max - t1_max) * t2_rate + (df['Gallons'] - t2_max) * t3_rate
+            ],
+            default=0
+        )
 
     df['Water_Charge'] = np.select(
         [ires_mask, icomm_mask, ores_mask, ocomm_mask],
-        [w_ires, w_icomm, w_ores, w_ocomm],
+        [
+            tiered_charge(ires_base, ires_t1_max, ires_t2_max, ires_t2_rate, ires_t3_rate),
+            tiered_charge(icomm_base, icomm_t1_max, icomm_t2_max, icomm_t2_rate, icomm_t3_rate),
+            tiered_charge(ores_base, ores_t1_max, ores_t2_max, ores_t2_rate, ores_t3_rate),
+            tiered_charge(ocomm_base, ocomm_t1_max, ocomm_t2_max, ocomm_t2_rate, ocomm_t3_rate)
+        ],
         default=0
     )
 
-    # --- Sewer Charges (includes DCRUA like rowwise logic) ---
-    if sewer_multiplier_enable:
-        sewer_i = np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 6.25) + df['Gallons'] * DCRUA_rate
-        sewer_o = np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 8.00) + df['Gallons'] * DCRUA_rate
-    else:
-        sewer_i = np.maximum(df['Gallons'] * base_sewer_rate, 6.25) + df['Gallons'] * DCRUA_rate
-        sewer_o = np.maximum(df['Gallons'] * base_sewer_rate, 8.00) + df['Gallons'] * DCRUA_rate
+    # --- Sewer Charges ---
+    ires_icomm_swr = df['Swr Rate'].isin(['IRES', 'ICOMM'])
+    ores_ocomm_swr = df['Swr Rate'].isin(['ORES', 'OCOMM'])
 
-    # Assign sewer charge only for recognized rates
+    sewer_i = np.where(
+        sewer_multiplier_enable,
+        np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 6.25) + df['Gallons'] * DCRUA_rate,
+        np.maximum(df['Gallons'] * base_sewer_rate, 6.25) + df['Gallons'] * DCRUA_rate
+    )
+
+    sewer_o = np.where(
+        sewer_multiplier_enable,
+        np.maximum(df['Water_Charge'] * sewer_multiplier_rate, 8.00) + df['Gallons'] * DCRUA_rate,
+        np.maximum(df['Gallons'] * base_sewer_rate, 8.00) + df['Gallons'] * DCRUA_rate
+    )
+
     df['Sewer_Charge'] = np.select(
         [ires_icomm_swr, ores_ocomm_swr],
         [sewer_i, sewer_o],
         default=0
     )
 
-    # --- Final Total ---
+    # --- DCRUA Charge ---
+    df['DCRUA_Charge'] = df['Gallons'] * DCRUA_rate
+
+    # --- Default total for valid rate combos ---
     df['Modified_Total_Estimated_Bill'] = np.where(
-        active_mask,
+        active_mask & valid_both,
         df['Water_Charge'] + df['Sewer_Charge'],
         0
     )
 
+    # --- Fallback: use actual row totals where rate missing ---
+    missing_rate_mask = active_mask & ~valid_both
+    df.loc[missing_rate_mask, 'Modified_Total_Estimated_Bill'] = (
+        df.loc[missing_rate_mask, 'Wtr_Amt_Num']
+        + df.loc[missing_rate_mask, 'Swr_Amt_Num']
+        + df.loc[missing_rate_mask, 'DCRUA_Num']
+    )
+
     return df
+
 
 # def make_modified_fn(
 #     ires_base, icomm_base, ores_base, ocomm_base,
