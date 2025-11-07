@@ -431,7 +431,7 @@ def compute_modified_bill(df,
     )
 
     # --- DCRUA Charge ---
-    df['DCRUA_Charge'] = df['Gallons'] * DCRUA_rate
+    #df['DCRUA_Charge'] = df['Gallons'] * DCRUA_rate
 
     # --- Default total for valid rate combos ---
     df['Modified_Total_Estimated_Bill'] = np.where(
