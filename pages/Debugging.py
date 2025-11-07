@@ -982,7 +982,15 @@ modified_dcrua = get_modified_dcrua(
 modified_water = file.apply(modified_wtr_rate, axis=1).sum()
 modified_sewer_rate = file.apply(modified_sewer_rate, axis=1).sum()
 modified_dcrua = file.apply(modified_dcrua, axis=1).sum()
-modified_total_revenue = compute_modified_bill(file)['Modified_Total_Estimated_Bill'].sum()#(modified_water+modified_sewer_rate+modified_dcrua).round(2)
+modified_total_revenue = compute_modified_bill(
+    file,
+    ires_base, icomm_base, ores_base, ocomm_base,
+    ires_tier1, ires_tier2, ires_2_5, ires_5,
+    ICOMM_tier1, ICOMM_tier2, icomm_2_5, icomm_5,
+    ORES_tier1, ORES_tier2, ores_2_5, ores_5,
+    OCOMM_tier1, OCOMM_tier2, ocomm_2_5, ocomm_5,
+    sewer_rate, check_box_sewer_multiplier_enable, sewer_multiplier_rate, DCRUA_rate
+)['Modified_Total_Estimated_Bill'].sum()#(modified_water+modified_sewer_rate+modified_dcrua).round(2)
 summary_table = pd.DataFrame({
     "Category": [
         "Total Revenue",
