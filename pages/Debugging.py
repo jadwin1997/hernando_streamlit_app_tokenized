@@ -888,7 +888,7 @@ actual_dcrua = clean_amt(file['DCRUA Amt']).sum()
 #     + file.apply(get_dcrua_rate_estimated, axis=1).sum()
 # ).round(2)
 #file['Estimated_Total_Bill'].sum()#monthly_totals['Estimated_Total_Bill'].sum()
-estimated_water = get_water_rate_estimated_vectorized(file)['Estimated_Total_Bill'].sum()
+estimated_water = get_water_rate_estimated_vectorized(file['Estimated_Total_Bill']).sum()
 
 #file.apply(get_water_rate_estimated, axis=1).sum()
 estimated_sewer = get_sewer_rate_estimated_vectorized(file).sum()
