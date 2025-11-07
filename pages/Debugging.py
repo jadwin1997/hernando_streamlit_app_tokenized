@@ -213,8 +213,7 @@ def check_estimated_vectorized_final(df):
     df['Sewer_Charge'] = sewer_charge
 
     # --- Add DCRUA for unknown sewer/water rates ---
-    mask_unknown_both = ~df['Wtr Rate'].isin(['IRES','ICOMM','ORES','OCOMM']) & \
-                        ~df['Swr Rate'].isin(['IRES','ICOMM','ORES','OCOMM'])
+    mask_unknown_both = ~df['Swr Rate'].isin(['IRES','ICOMM','ORES','OCOMM'])
 
     df.loc[mask_unknown_both, 'Sewer_Charge'] += df.loc[mask_unknown_both, 'DCRUA_Num']
 
