@@ -1237,7 +1237,7 @@ plot_revenue_distribution(file, "OCOMM", "OCOMM",OCOMM_tier1,OCOMM_tier2, revenu
 
 
 # --- Combined Distribution by Class + Usage ---
-st.subheader("Revenue Distribution by Water Rate Class /n + Dynamic Usage Tiers")
+st.subheader("Revenue Distribution by Water Rate Class + Dynamic Usage Tiers")
 
 # Apply usage categories for valid classes
 valid_classes = ["IRES", "ORES", "ICOMM", "OCOMM"]
@@ -1297,7 +1297,7 @@ ax8.legend(
     loc="center left",
     bbox_to_anchor=(1, 0, 0.5, 1)
 )
-ax8.set_title("Revenue Distribution by Class + Usage Tier")
+ax8.set_title("Revenue Distribution by Class /n+ Usage Tier")
 st.pyplot(fig8)
 
 # --- Bar chart of revenue ---
