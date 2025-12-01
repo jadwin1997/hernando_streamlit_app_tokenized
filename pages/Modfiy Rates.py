@@ -1237,7 +1237,7 @@ plot_revenue_distribution(file, "OCOMM", "OCOMM",OCOMM_tier1,OCOMM_tier2, revenu
 
 
 # --- Combined Distribution by Class + Usage ---
-st.subheader("Revenue Distribution by Water Rate Class + Dynamic Usage Tiers")
+st.subheader("Revenue Distribution by Water Rate Class /n + Dynamic Usage Tiers")
 
 # Apply usage categories for valid classes
 valid_classes = ["IRES", "ORES", "ICOMM", "OCOMM"]
