@@ -1297,7 +1297,7 @@ ax8.legend(
     bbox_to_anchor=(1, 0, 0.5, 1)
 )
 ax8.set_title("Revenue Distribution by Class + Usage Tier")
-st.pyplot(fig8)
+st.pyplot(fig8) 
 
 # --- Bar chart of revenue ---
 fig9, ax9 = plt.subplots(figsize=(10,6))
