@@ -10,7 +10,7 @@ import base64
 import plotly.express as px
 st.title("Hernando Billing Report Analysis")
 
-plt.rcParams['font.size'] = 14   # sets default font size
+plt.rcParams['font.size'] = 50  # sets default font size
 
 st.markdown("""
 **Instructions:**
