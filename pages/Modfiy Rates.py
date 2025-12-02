@@ -1209,7 +1209,7 @@ usage_by_class_usage = (
 )
 
 # Bar chart of usage
-fig10, ax10 = plt.subplots(figsize=(10,6))
+fig10, ax10 = plt.subplots(figsize=(7,5))
 usage_by_class_usage.plot(
     kind="bar",
     ax=ax10,
@@ -1301,7 +1301,7 @@ ax8.set_title("Revenue Distribution by Class \n+ Usage Tier")
 st.pyplot(fig8)
 
 # --- Bar chart of revenue ---
-fig9, ax9 = plt.subplots(figsize=(6,4))
+fig9, ax9 = plt.subplots(figsize=(7,5))
 revenue_by_class_usage.plot(
     kind="bar",
     ax=ax9,
